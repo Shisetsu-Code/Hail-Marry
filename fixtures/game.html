@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hail Marry local control fixture</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; overflow-x: hidden; background: #0b1323; color: #dbe8f7; font: 16px system-ui, sans-serif; }
+    header { width: min(960px, calc(100vw - 32px)); margin: 18px auto 12px; color: #b5c5d9; font-size: 14px; }
+    #game-surface { position: relative; width: min(960px, calc(100vw - 32px)); aspect-ratio: 16 / 9; margin: 0 auto; overflow: hidden; border: 1px solid #334863; border-radius: 12px; background: #152238; }
+    #game-canvas { display: block; width: 100%; height: 100%; }
+    [hidden] { display: none !important; }
+    button { min-height: 46px; border: 2px solid #7fb2d8; border-radius: 9px; padding: 10px 19px; background: #183d63; color: #fff; font: 700 19px system-ui, sans-serif; cursor: pointer; }
+    button:focus-visible { outline: 4px solid #ffe07c; outline-offset: 3px; }
+    button:disabled { opacity: .45; cursor: default; }
+    #intro-layer, #game-controls { position: absolute; inset: 0; pointer-events: none; }
+    #intro-layer button, #game-controls button { pointer-events: auto; }
+    #intro-continue { position: absolute; left: 26%; top: 65%; width: 48%; height: 14%; background: #f4ce73; color: #14233b; border-color: #fff1ba; }
+    #menu-button { position: absolute; left: 5%; bottom: 6%; }
+    #spin-button { position: absolute; right: 7%; bottom: 6%; min-width: 135px; background: #17634e; border-color: #9de3b7; }
+    #bet-plus { position: absolute; left: 24%; bottom: 6%; }
+    #collect-button { position: absolute; left: 43%; bottom: 6%; }
+    #blocked-button { position: absolute; left: 8%; top: 13%; width: 170px; height: 55px; }
+    #control-cover { position: absolute; left: 7%; top: 11%; width: 205px; height: 80px; z-index: 3; display: grid; place-items: center; pointer-events: auto; background: #4a2a52; border: 2px solid #bc97c5; border-radius: 8px; color: #e7caed; font-weight: 700; }
+    #offscreen-button { position: fixed; left: -2000px; top: 100px; }
+    #menu-panel { position: absolute; z-index: 8; left: 23%; top: 20%; width: 54%; height: 55%; padding: 22px; background: #edf3fb; color: #15233b; border: 3px solid #7aa6cb; border-radius: 14px; box-shadow: 0 12px 30px #0009; pointer-events: auto; }
+    #menu-panel h2 { margin: 0 0 24px; font-size: 24px; }
+    #settings-sound { position: absolute; left: 8%; top: 37%; }
+    #close-menu { position: absolute; right: 8%; bottom: 12%; }
+    #transient-button { position: absolute; z-index: 20; left: 40%; top: 11%; background: #9b3726; border-color: #ffc392; }
+    #status { width: min(960px, calc(100vw - 32px)); margin: 12px auto; color: #93a9c4; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header>Hail Marry · local browser fixture</header>
+  <main id="game-surface">
+    <canvas id="game-canvas" width="960" height="540"></canvas>
+    <div id="intro-layer" hidden>
+      <button id="intro-continue" type="button">CLICK TO CONTINUE</button>
+    </div>
+    <div id="game-controls" hidden>
+      <button id="menu-button" type="button">Menu</button>
+      <button id="spin-button" type="button">Spin</button>
+      <button id="bet-plus" type="button" disabled>Bet +</button>
+      <button id="collect-button" type="button" hidden>Collect</button>
+      <button id="blocked-button" type="button">Blocked</button>
+      <div id="control-cover">Covered control</div>
+      <button id="offscreen-button" type="button">Offscreen</button>
+      <section id="menu-panel" aria-label="Settings" hidden>
+        <h2>Settings</h2>
+        <button id="settings-sound" type="button" aria-pressed="true">Sound on</button>
+        <button id="close-menu" type="button">Close menu</button>
+      </section>
+      <button id="transient-button" type="button" hidden>Transient</button>
+    </div>
+  </main>
+  <p id="status">Local simulation; no network requests or wagering.</p>
+  <script>
+    (() => {
+      'use strict';
+      const mode = new URLSearchParams(location.search).get('mode') === 'dom' ? 'dom' : 'canvas';
+      const canvas = document.querySelector('#game-canvas');
+      const ctx = canvas.getContext('2d');
+      const byId = id => document.getElementById(id);
+      const introRect = Object.freeze({ x: 250, y: 350, width: 460, height: 75 });
+      const state = {
+        mode, phase: 'intro', inputCount: 0, introClicks: 0, spinCount: 0,
+        menuClicks: 0, menuOpen: false, menuPending: false, settingsClicks: 0,
+        closeClicks: 0, blockedClicks: 0, offscreenClicks: 0, collectClicks: 0,
+        transientClicks: 0, canvasClicks: 0, soundOn: true, flashing: false,
+      };
+      let menuTimer = null;
+      let flashTimer = null;
+
+      function draw() {
+        const background = ctx.createLinearGradient(0, 0, 960, 540);
+        background.addColorStop(0, '#18334c');
+        background.addColorStop(1, '#162238');
+        ctx.fillStyle = background;
+        ctx.fillRect(0, 0, 960, 540);
+        ctx.textAlign = 'center';
+        ctx.fillStyle = '#c6dfed';
+        ctx.font = '700 36px Arial, sans-serif';
+        ctx.fillText('LOCAL GAME', 480, 100);
+        const colors = ['#7cbfa2', '#d7b56d', '#78a5ce'];
+        for (let i = 0; i < 3; i++) {
+          ctx.fillStyle = '#233c56';
+          ctx.fillRect(295 + i * 130, 155, 110, 130);
+          ctx.fillStyle = colors[i];
+          ctx.beginPath();
+          ctx.arc(350 + i * 130, 218, 31, 0, Math.PI * 2);
+          ctx.fill();
+        }
+        if (state.phase === 'intro' && mode === 'canvas') {
+          ctx.fillStyle = '#f4ce73';
+          ctx.fillRect(introRect.x, introRect.y, introRect.width, introRect.height);
+          ctx.strokeStyle = '#fff1ba';
+          ctx.lineWidth = 3;
+          ctx.strokeRect(introRect.x, introRect.y, introRect.width, introRect.height);
+          ctx.fillStyle = '#14233b';
+          ctx.font = '700 31px Arial, sans-serif';
+          ctx.fillText('CLICK TO CONTINUE', 480, 399);
+        } else if (state.phase === 'base') {
+          ctx.fillStyle = '#b6d1df';
+          ctx.font = '22px Arial, sans-serif';
+          ctx.fillText('SIMULATED SPINS: ' + state.spinCount, 480, 365);
+        }
+      }
+
+      function record(key) { state.inputCount++; state[key]++; }
+      function continueIntro() {
+        if (state.phase !== 'intro') return;
+        record('introClicks');
+        state.phase = 'base';
+        byId('intro-layer').hidden = true;
+        byId('game-controls').hidden = false;
+        draw();
+      }
+
+      canvas.addEventListener('click', event => {
+        state.canvasClicks++;
+        if (state.phase !== 'intro' || mode !== 'canvas') return;
+        const box = canvas.getBoundingClientRect();
+        const x = (event.clientX - box.left) * canvas.width / box.width;
+        const y = (event.clientY - box.top) * canvas.height / box.height;
+        if (x >= introRect.x && x <= introRect.x + introRect.width &&
+            y >= introRect.y && y <= introRect.y + introRect.height) continueIntro();
+      });
+      byId('intro-continue').addEventListener('click', continueIntro);
+      byId('spin-button').addEventListener('click', () => {
+        record('spinCount');
+        draw();
+      });
+      byId('menu-button').addEventListener('click', () => {
+        record('menuClicks');
+        if (state.menuOpen || state.menuPending) return;
+        state.menuPending = true;
+        menuTimer = setTimeout(() => {
+          state.menuPending = false;
+          state.menuOpen = true;
+          byId('menu-panel').hidden = false;
+        }, 150);
+      });
+      byId('settings-sound').addEventListener('click', () => {
+        record('settingsClicks');
+        state.soundOn = !state.soundOn;
+        byId('settings-sound').textContent = state.soundOn ? 'Sound on' : 'Sound off';
+        byId('settings-sound').setAttribute('aria-pressed', String(state.soundOn));
+      });
+      byId('close-menu').addEventListener('click', () => {
+        record('closeClicks');
+        state.menuOpen = false;
+        byId('menu-panel').hidden = true;
+      });
+      for (const [id, counter] of [
+        ['blocked-button', 'blockedClicks'], ['offscreen-button', 'offscreenClicks'],
+        ['collect-button', 'collectClicks'], ['transient-button', 'transientClicks'],
+      ]) byId(id).addEventListener('click', () => record(counter));
+
+      // Test-driver diagnostics only. Detector code must inspect ordinary UI APIs.
+      window.__fixture = {
+        state,
+        introRect,
+        snapshot: () => ({ ...state }),
+        flash() {
+          clearTimeout(flashTimer);
+          state.flashing = true;
+          byId('transient-button').hidden = false;
+          flashTimer = setTimeout(() => {
+            state.flashing = false;
+            byId('transient-button').hidden = true;
+          }, 40);
+        },
+        setCovered(covered = true) { byId('control-cover').hidden = !covered; },
+        showCollect(visible = true) { byId('collect-button').hidden = !visible; },
+        reset() {
+          clearTimeout(menuTimer);
+          clearTimeout(flashTimer);
+          for (const key of Object.keys(state)) {
+            if (typeof state[key] === 'number') state[key] = 0;
+          }
+          Object.assign(state, { phase: 'intro', menuOpen: false, menuPending: false, soundOn: true, flashing: false });
+          byId('game-controls').hidden = true;
+          byId('intro-layer').hidden = mode !== 'dom';
+          byId('menu-panel').hidden = true;
+          byId('transient-button').hidden = true;
+          byId('collect-button').hidden = true;
+          byId('control-cover').hidden = false;
+          byId('settings-sound').textContent = 'Sound on';
+          byId('settings-sound').setAttribute('aria-pressed', 'true');
+          draw();
+        },
+      };
+      byId('intro-layer').hidden = mode !== 'dom';
+      draw();
+    })();
+  </script>
+</body>
+</html>

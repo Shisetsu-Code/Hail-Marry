@@ -1,0 +1,61 @@
+import assert from 'node:assert/strict';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { chromium } from 'playwright';
+import { startFixtureServer } from './fixture-server.mjs';
+import { GameSession } from '../src/session.mjs';
+import { LayaClient } from '../src/laya-client.mjs';
+import { introCandidates } from '../src/intro.mjs';
+const fixture = await startFixtureServer();
+const browser = await chromium.launch({ executablePath: process.env.CHROMIUM_EXECUTABLE_PATH || undefined, headless: true });
+const outputDir = 'artifacts/fixture';
+await mkdir(outputDir, { recursive: true });
+let session;
+const checks = [];
+try {
+  const page = await browser.newPage({ viewport: { width: 1280, height: 720 }, deviceScaleFactor: 1 });
+  const laya = new LayaClient({ timeoutMs: 45000 });
+  await laya.health();
+  session = new GameSession(page, { outputDir, laya, initialWaitMs: 60000, settleMs: 1500, sampleGapMs: 300,
+    onEvent: event => process.stdout.write(JSON.stringify(event) + '\n') });
+  const initial = await session.open(fixture.gameUrl);
+  assert.ok(session.report.initialWaitElapsedMs >= 60000, 'Initial no-input delay must be at least60s');
+  assert.equal((await page.evaluate(() => window.__fixture.snapshot())).inputCount, 0);
+  assert.ok(introCandidates(initial).some(c => c.kind === 'ocr'), 'Canvas text must be read with real OCR');
+  checks.push('60s without input; canvas intro read by Tesseract');
+  let state = await session.resolveIntros(initial);
+  assert.equal((await page.evaluate(() => window.__fixture.snapshot())).phase, 'base', 'Real Laya/OCR must advance canvas intro');
+  assert.equal(session.report.actions.length, 1);
+  assert.ok(session.report.actions[0].settleElapsedMs >= 1500);
+  checks.push('Real Laya chose intro; one dispatched click; post-action delay>=1500ms');
+  const find = (current, text) => current.controls.find(c => (c.label || '').toLowerCase() === text.toLowerCase());
+  assert.equal(find(state, 'Menu')?.availability, 'available');
+  assert.equal(find(state, 'Bet +')?.availability, 'unavailable');
+  assert.notEqual(find(state, 'Collect')?.availability, 'available');
+  assert.notEqual(find(state, 'Blocked')?.availability, 'available');
+  assert.notEqual(find(state, 'Offscreen')?.availability, 'available');
+  assert.ok(!state.controls.some(c => c.role === 'canvas' && c.availability === 'available'));
+  checks.push('Available/disabled/hidden/covered/offscreen cases classified separately');
+  state = await session.actOnControl(find(state, 'Menu'));
+  assert.equal(find(state, 'Sound on')?.availability, 'available', 'Delayed menu controls must be discovered after the action');
+  state = await session.actOnControl(find(state, 'Close menu'));
+  assert.notEqual(find(state, 'Sound on')?.availability, 'available', 'Closed controls must disappear from available state');
+  checks.push('After-action dynamic discovery: menu open and close');
+  await page.evaluate(() => window.__fixture.flash());
+  state = await session.observe('40ms-flicker');
+  assert.notEqual(find(state, 'Transient')?.availability, 'available');
+  const finalFixture = await page.evaluate(() => window.__fixture.snapshot());
+  assert.equal(finalFixture.transientClicks, 0);
+  assert.equal(finalFixture.spinCount, 0);
+  assert.equal(finalFixture.blockedClicks, 0);
+  checks.push('40ms control was never promoted to available or clicked');
+  const result = { status: 'passed', checks, fixture: finalFixture, actions: session.report.actions.length, initialWaitElapsedMs: session.report.initialWaitElapsedMs, observations: session.report.observations.length };
+  await writeFile(outputDir + '/result.json', JSON.stringify(result, null, 2));
+  process.stdout.write(JSON.stringify(result, null, 2) + '\n');
+} catch (error) {
+  await writeFile(outputDir + '/result.json', JSON.stringify({ status: 'failed', checks, error: error.stack }, null, 2));
+  throw error;
+} finally {
+  if (session) await session.save();
+  await browser.close();
+  await fixture.close();
+}

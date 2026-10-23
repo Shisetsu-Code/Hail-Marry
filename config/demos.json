@@ -1,0 +1,28 @@
+{
+  "demos": [
+    {
+      "id": "pragmatic-3-dancing-monkeys",
+      "provider": "pragmatic",
+      "url": "https://www.pragmaticplay.com/en/games/3-dancing-monkeys/",
+      "symbol": "vswaysmonkey",
+      "requiresLauncher": true,
+      "source": "Official public game page; resolve its fresh demogamesfree.pragmaticplay.net DEMO iframe. Entry and symbol observed in Shisetsu-Code/Hybrid-actions at 16274584aaef8b4780a8d7d68047e5dab6f5d202/config/providers.json; prior completed DEMO documented in Shisetsu-Code/hybrid-cloud-fuzzer at 045d403e06f8255d92f1e393a755edfeed5da0c3/docs/LIVE_PILOT_2026_10_23.md. Runtime inspection in those sources is UHT/globalRuntime, not confirmed Laya.",
+      "actions": []
+    },
+    {
+      "id": "playngo-amulet-of-dead-mobile",
+      "provider": "playngo",
+      "url": "https://released.playngonetwork.com/casino/ContainerLauncher?channel=mobile&demo=2&gid=amuletofdead&lang=en_GB&pid=2&practice=1",
+      "device": "Pixel 7",
+      "source": "Canonical free mobile demo link on https://www.playngo.com/games/rich-wilde-and-the-amulet-of-dead, observed 2026-10-23. Prior mobile launch evidence and exact parameters: Shisetsu-Code/Hybrid-actions at 16274584aaef8b4780a8d7d68047e5dab6f5d202/test/playngo-mobile-probe.mjs and docs/PLAYNGO_MOBILE_PROBE.md. Use channel=mobile with mobile/touch device emulation.",
+      "actions": []
+    },
+    {
+      "id": "bgaming-three-lucky-monkeys",
+      "provider": "bgaming",
+      "url": "https://demo.bgaming-network.com/play/ThreeLuckyMonkeysHoldAndWin/FUN?server=demo",
+      "source": "Exact public FUN entry observed in Shisetsu-Code/Hybrid-actions at 16274584aaef8b4780a8d7d68047e5dab6f5d202/config/providers.json. Its docs/TESTER_SPIN_LAUNCHERS.md records official /play/ to /games/ FUN redirects and demo_fun_curacao. This manifest does not certify current runtime readiness or a specific rendering engine.",
+      "actions": []
+    }
+  ]
+}
