@@ -58,6 +58,21 @@ jobs:
         timeout-minutes: 5
         run: |
           mkdir -p artifacts
+          # The Azure APT mirror delivered only 44 kB/s in the previous runner.
+          # Keep the signed Ubuntu repositories, using Ubuntu's own archive host.
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          import re
+          files = [Path('/etc/apt/sources.list'), *Path('/etc/apt/sources.list.d').glob('*.list'), *Path('/etc/apt/sources.list.d').glob('*.sources')]
+          for source in files:
+              if not source.is_file():
+                  continue
+              current = source.read_text()
+              updated = re.sub(r'https?://azure\.archive\.ubuntu\.com(?=/|\s|$)', 'https://archive.ubuntu.com', current)
+              if updated != current:
+                  source.write_text(updated)
+                  print('Using Ubuntu archive in ' + source.name)
+          PY
           npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee artifacts/install-node.log
           sudo apt-get update -qq 2>&1 | tee artifacts/install-apt-update.log
           sudo apt-get install -y tesseract-ocr tesseract-ocr-eng 2>&1 | tee artifacts/install-tesseract.log
