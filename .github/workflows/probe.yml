@@ -54,14 +54,24 @@ jobs:
         with:
           path: ~/.cache/huggingface
           key: laya-multilingual-1720e3e3357cfe1e281542e223f8273b0890ca34
-      - name: Install Chromium and OCR
+      - name: Install Node dependencies and Tesseract
+        timeout-minutes: 5
         run: |
-          npm ci --ignore-scripts --no-audit --no-fund
-          sudo apt-get update -qq
-          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
-          python -m pip install -r requirements-ocr.txt
-          npx playwright install-deps chromium
-          npx playwright install chromium || python scripts/install-browser-fallback.py
+          mkdir -p artifacts
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee artifacts/install-node.log
+          sudo apt-get update -qq 2>&1 | tee artifacts/install-apt-update.log
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng 2>&1 | tee artifacts/install-tesseract.log
+      - name: Install OCR preprocessing
+        timeout-minutes: 2
+        run: |
+          python -m pip install --disable-pip-version-check --timeout 30 --only-binary=:all: -r requirements-ocr.txt 2>&1 | tee artifacts/install-pillow.log
+      - name: Install browser system dependencies
+        timeout-minutes: 5
+        run: npx playwright install-deps chromium 2>&1 | tee artifacts/install-browser-deps.log
+      - name: Download Chromium with bounded mirror fallback
+        timeout-minutes: 4
+        run: |
+          { timeout 90s npx playwright install chromium || timeout 90s python scripts/install-browser-fallback.py; } 2>&1 | tee artifacts/install-chromium.log
       - name: Unit and browser regression tests
         run: |
           mkdir -p artifacts
