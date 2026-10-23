@@ -1,0 +1,425 @@
+{
+  "schemaVersion": 1,
+  "runId": "guided-20261023",
+  "revision": 7,
+  "createdAt": "2026-10-23T23:21:35.046Z",
+  "games": [
+    {
+      "id": "pragmatic-3-dancing-monkeys",
+      "title": "pragmatic-3-dancing-monkeys",
+      "provider": "pragmatic",
+      "status": "loading",
+      "busy": false,
+      "error": null,
+      "finished": false,
+      "spinControlId": null,
+      "screen": null,
+      "screens": [],
+      "controls": [],
+      "actions": [],
+      "requiresReview": false
+    },
+    {
+      "id": "playngo-amulet-of-dead-mobile",
+      "title": "playngo-amulet-of-dead-mobile",
+      "provider": "playngo",
+      "status": "ready",
+      "busy": false,
+      "error": null,
+      "finished": false,
+      "spinControlId": null,
+      "screen": {
+        "id": "42171e1f-1b1e-4067-8ad8-ee072365fe46",
+        "gameId": "playngo-amulet-of-dead-mobile",
+        "sessionId": "e5ecfc02-5c75-49b4-b3a7-28bb3cc239b5",
+        "revision": 1,
+        "imageSha256": "1d348a1fd0c0fab73656f0e3bf26066f902cee56aedebc15ee7561c557447bb8",
+        "imageUrl": "/api/images/playngo-amulet-of-dead-mobile-1-1d348a1fd0c0fab73656.jpg",
+        "width": 412,
+        "height": 839,
+        "createdAt": "2026-10-23T23:22:36.643Z",
+        "parentScreenId": null,
+        "viaControlId": null,
+        "route": [],
+        "routeVerified": true,
+        "candidates": [],
+        "state": {
+          "controls": [
+            {
+              "localId": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+              "source": "dom",
+              "selector": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+              "role": "button",
+              "label": "select to enable accessibility for this content",
+              "visible": false,
+              "enabled": true,
+              "interactable": false,
+              "bounds": {
+                "x": -1000,
+                "y": -1000,
+                "width": 16,
+                "height": 6
+              },
+              "geometryReliable": true,
+              "probePoints": [],
+              "inputPoints": [],
+              "hitPoint": null,
+              "observedAt": "2026-10-23T23:22:35.790Z",
+              "evidence": {
+                "kind": "dom-hit-test",
+                "receivesInput": false,
+                "declaredDisabled": false,
+                "focusableHint": true,
+                "readOnly": false,
+                "reason": "hidden-or-offscreen"
+              },
+              "id": "frame-1:dom:1792797695506.7:html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+              "frameId": "frame-1",
+              "frameIndex": 0,
+              "frameUrl": "https://released.playngonetwork.com/casino/ContainerLauncher",
+              "documentEpoch": 1792797695506.7,
+              "normalizedBounds": {
+                "x": -1.019367991845056,
+                "y": -0.501002004008016,
+                "width": 0.0163098878695209,
+                "height": 0.003006012024048096
+              },
+              "normalizedPoint": null,
+              "stable": true,
+              "availability": "unavailable",
+              "actionConfirmed": false,
+              "persistence": {
+                "samples": 2,
+                "gapMs": 289,
+                "firstObservedAt": "2026-10-23T23:22:35.501Z",
+                "lastObservedAt": "2026-10-23T23:22:35.790Z",
+                "reason": "two-sample-match"
+              }
+            },
+            {
+              "localId": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+              "source": "dom",
+              "selector": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+              "role": "button",
+              "label": "select to enable accessibility for this content",
+              "visible": false,
+              "enabled": true,
+              "interactable": false,
+              "bounds": {
+                "x": -1000,
+                "y": -1000,
+                "width": 16,
+                "height": 6
+              },
+              "geometryReliable": true,
+              "probePoints": [],
+              "inputPoints": [],
+              "hitPoint": null,
+              "observedAt": "2026-10-23T23:22:35.790Z",
+              "evidence": {
+                "kind": "dom-hit-test",
+                "receivesInput": false,
+                "declaredDisabled": false,
+                "focusableHint": true,
+                "readOnly": false,
+                "reason": "hidden-or-offscreen"
+              },
+              "id": "frame-1:dom:1792797695506.7:html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+              "frameId": "frame-1",
+              "frameIndex": 0,
+              "frameUrl": "https://released.playngonetwork.com/casino/ContainerLauncher",
+              "documentEpoch": 1792797695506.7,
+              "normalizedBounds": {
+                "x": -1.019367991845056,
+                "y": -0.501002004008016,
+                "width": 0.0163098878695209,
+                "height": 0.003006012024048096
+              },
+              "normalizedPoint": null,
+              "stable": true,
+              "availability": "unavailable",
+              "actionConfirmed": false,
+              "persistence": {
+                "samples": 2,
+                "gapMs": 289,
+                "firstObservedAt": "2026-10-23T23:22:35.501Z",
+                "lastObservedAt": "2026-10-23T23:22:35.790Z",
+                "reason": "two-sample-match"
+              }
+            }
+          ],
+          "transient": [],
+          "observedAt": "2026-10-23T23:22:35.799Z",
+          "viewport": {
+            "width": 981,
+            "height": 1996
+          },
+          "coverage": {
+            "complete": true,
+            "samples": [
+              {
+                "complete": true,
+                "framesSeen": 1,
+                "framesScanned": 1,
+                "frames": [
+                  {
+                    "frameId": "frame-1",
+                    "frameIndex": 0,
+                    "complete": true,
+                    "nodesVisited": 348,
+                    "engines": [],
+                    "warnings": []
+                  }
+                ],
+                "errors": []
+              },
+              {
+                "complete": true,
+                "framesSeen": 1,
+                "framesScanned": 1,
+                "frames": [
+                  {
+                    "frameId": "frame-1",
+                    "frameIndex": 0,
+                    "complete": true,
+                    "nodesVisited": 348,
+                    "engines": [],
+                    "warnings": []
+                  }
+                ],
+                "errors": []
+              }
+            ],
+            "limitations": [
+              "Two samples establish sampled persistence only; changes between samples may be missed.",
+              "Input receipt is separate from action success; the detector performs no actions.",
+              "Closed shadow roots, inaccessible frames, hidden runtime roots and unsupported transforms reduce coverage.",
+              "Private engine flags and unverified scene geometry never establish availability."
+            ]
+          },
+          "samples": [
+            {
+              "observedAt": "2026-10-23T23:22:35.508Z",
+              "startedAt": "2026-10-23T23:22:35.485Z",
+              "durationMs": 23,
+              "controls": 2
+            },
+            {
+              "observedAt": "2026-10-23T23:22:35.799Z",
+              "startedAt": "2026-10-23T23:22:35.787Z",
+              "durationMs": 12,
+              "controls": 2
+            }
+          ]
+        }
+      },
+      "screens": [
+        {
+          "id": "42171e1f-1b1e-4067-8ad8-ee072365fe46",
+          "gameId": "playngo-amulet-of-dead-mobile",
+          "sessionId": "e5ecfc02-5c75-49b4-b3a7-28bb3cc239b5",
+          "revision": 1,
+          "imageSha256": "1d348a1fd0c0fab73656f0e3bf26066f902cee56aedebc15ee7561c557447bb8",
+          "imageUrl": "/api/images/playngo-amulet-of-dead-mobile-1-1d348a1fd0c0fab73656.jpg",
+          "width": 412,
+          "height": 839,
+          "createdAt": "2026-10-23T23:22:36.643Z",
+          "parentScreenId": null,
+          "viaControlId": null,
+          "route": [],
+          "routeVerified": true,
+          "candidates": [],
+          "state": {
+            "controls": [
+              {
+                "localId": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+                "source": "dom",
+                "selector": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+                "role": "button",
+                "label": "select to enable accessibility for this content",
+                "visible": false,
+                "enabled": true,
+                "interactable": false,
+                "bounds": {
+                  "x": -1000,
+                  "y": -1000,
+                  "width": 16,
+                  "height": 6
+                },
+                "geometryReliable": true,
+                "probePoints": [],
+                "inputPoints": [],
+                "hitPoint": null,
+                "observedAt": "2026-10-23T23:22:35.790Z",
+                "evidence": {
+                  "kind": "dom-hit-test",
+                  "receivesInput": false,
+                  "declaredDisabled": false,
+                  "focusableHint": true,
+                  "readOnly": false,
+                  "reason": "hidden-or-offscreen"
+                },
+                "id": "frame-1:dom:1792797695506.7:html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(1)",
+                "frameId": "frame-1",
+                "frameIndex": 0,
+                "frameUrl": "https://released.playngonetwork.com/casino/ContainerLauncher",
+                "documentEpoch": 1792797695506.7,
+                "normalizedBounds": {
+                  "x": -1.019367991845056,
+                  "y": -0.501002004008016,
+                  "width": 0.0163098878695209,
+                  "height": 0.003006012024048096
+                },
+                "normalizedPoint": null,
+                "stable": true,
+                "availability": "unavailable",
+                "actionConfirmed": false,
+                "persistence": {
+                  "samples": 2,
+                  "gapMs": 289,
+                  "firstObservedAt": "2026-10-23T23:22:35.501Z",
+                  "lastObservedAt": "2026-10-23T23:22:35.790Z",
+                  "reason": "two-sample-match"
+                }
+              },
+              {
+                "localId": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+                "source": "dom",
+                "selector": "html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+                "role": "button",
+                "label": "select to enable accessibility for this content",
+                "visible": false,
+                "enabled": true,
+                "interactable": false,
+                "bounds": {
+                  "x": -1000,
+                  "y": -1000,
+                  "width": 16,
+                  "height": 6
+                },
+                "geometryReliable": true,
+                "probePoints": [],
+                "inputPoints": [],
+                "hitPoint": null,
+                "observedAt": "2026-10-23T23:22:35.790Z",
+                "evidence": {
+                  "kind": "dom-hit-test",
+                  "receivesInput": false,
+                  "declaredDisabled": false,
+                  "focusableHint": true,
+                  "readOnly": false,
+                  "reason": "hidden-or-offscreen"
+                },
+                "id": "frame-1:dom:1792797695506.7:html:nth-of-type(1) > body:nth-of-type(1) > button:nth-of-type(2)",
+                "frameId": "frame-1",
+                "frameIndex": 0,
+                "frameUrl": "https://released.playngonetwork.com/casino/ContainerLauncher",
+                "documentEpoch": 1792797695506.7,
+                "normalizedBounds": {
+                  "x": -1.019367991845056,
+                  "y": -0.501002004008016,
+                  "width": 0.0163098878695209,
+                  "height": 0.003006012024048096
+                },
+                "normalizedPoint": null,
+                "stable": true,
+                "availability": "unavailable",
+                "actionConfirmed": false,
+                "persistence": {
+                  "samples": 2,
+                  "gapMs": 289,
+                  "firstObservedAt": "2026-10-23T23:22:35.501Z",
+                  "lastObservedAt": "2026-10-23T23:22:35.790Z",
+                  "reason": "two-sample-match"
+                }
+              }
+            ],
+            "transient": [],
+            "observedAt": "2026-10-23T23:22:35.799Z",
+            "viewport": {
+              "width": 981,
+              "height": 1996
+            },
+            "coverage": {
+              "complete": true,
+              "samples": [
+                {
+                  "complete": true,
+                  "framesSeen": 1,
+                  "framesScanned": 1,
+                  "frames": [
+                    {
+                      "frameId": "frame-1",
+                      "frameIndex": 0,
+                      "complete": true,
+                      "nodesVisited": 348,
+                      "engines": [],
+                      "warnings": []
+                    }
+                  ],
+                  "errors": []
+                },
+                {
+                  "complete": true,
+                  "framesSeen": 1,
+                  "framesScanned": 1,
+                  "frames": [
+                    {
+                      "frameId": "frame-1",
+                      "frameIndex": 0,
+                      "complete": true,
+                      "nodesVisited": 348,
+                      "engines": [],
+                      "warnings": []
+                    }
+                  ],
+                  "errors": []
+                }
+              ],
+              "limitations": [
+                "Two samples establish sampled persistence only; changes between samples may be missed.",
+                "Input receipt is separate from action success; the detector performs no actions.",
+                "Closed shadow roots, inaccessible frames, hidden runtime roots and unsupported transforms reduce coverage.",
+                "Private engine flags and unverified scene geometry never establish availability."
+              ]
+            },
+            "samples": [
+              {
+                "observedAt": "2026-10-23T23:22:35.508Z",
+                "startedAt": "2026-10-23T23:22:35.485Z",
+                "durationMs": 23,
+                "controls": 2
+              },
+              {
+                "observedAt": "2026-10-23T23:22:35.799Z",
+                "startedAt": "2026-10-23T23:22:35.787Z",
+                "durationMs": 12,
+                "controls": 2
+              }
+            ]
+          }
+        }
+      ],
+      "controls": [],
+      "actions": [],
+      "requiresReview": false
+    },
+    {
+      "id": "bgaming-three-lucky-monkeys",
+      "title": "bgaming-three-lucky-monkeys",
+      "provider": "bgaming",
+      "status": "loading",
+      "busy": false,
+      "error": null,
+      "finished": false,
+      "spinControlId": null,
+      "screen": null,
+      "screens": [],
+      "controls": [],
+      "actions": [],
+      "requiresReview": false
+    }
+  ],
+  "requests": {},
+  "updatedAt": "2026-10-23T23:22:36.652Z"
+}
