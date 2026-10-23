@@ -137,6 +137,63 @@ print(json.dumps([{key: result[key] for key in ['status', 'action', 'candidateId
   ]);
 });
 
+test('sidecar blocks a high-confidence gameplay target without replacing the model choice', () => {
+  const script = `
+import copy, importlib.util, json, sys
+spec = importlib.util.spec_from_file_location('laya_sidecar', sys.argv[1])
+module = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(module)
+# The SPIN response is the real mixed-controls output from GitHub run 6.
+# Purchase labels below deliberately reuse that adverse high-confidence output
+# to test enforcement, not to claim the model produced those purchase outputs.
+raw = {'answers': {
+ 'intent': {'type': 'choice', 'choice': 'continue', 'probabilities': {'continue': .9579, 'dismiss': .0146, 'none': .0276}, 'confidence': .8163, 'answer_confidence': .9579, 'action': {'act_probability': 1}},
+ 'target': {'type': 'choice', 'choice': 'control_0', 'probabilities': {'control_0': .9938, 'control_1': .005, 'control_2': .0003, 'no_control': .001}, 'confidence': .97, 'answer_confidence': .9938, 'action': {'act_probability': 1}}
+}, 'usage': {'input_tokens': 306, 'output_tokens': 0, 'state_tokens': 78, 'state_tokens_dropped': 0, 'truncated': False, 'truncated_questions': []}}
+original = copy.deepcopy(raw)
+results = []
+for label in ['SPIN', 'BUY BONUS', 'BUY BONUS TO CONTINUE']:
+ payload = module.validate_payload({'text': 'CLICK TO CONTINUE', 'candidates': [
+  {'id': 'c0', 'text': label, 'kind': 'control'},
+  {'id': 'c1', 'text': 'CLICK TO CONTINUE', 'kind': 'ocr'},
+  {'id': 'c2', 'text': 'BUY BONUS', 'kind': 'control'}
+ ]})
+ result = module.interpret_prediction(raw, payload, .8)
+ results.append({'label': label, 'result': result})
+assert raw == original, 'The guard must not rewrite the raw model output'
+# A valid chosen label remains actionable even when another candidate is SPIN.
+payload = module.validate_payload({'text': 'CLICK TO CONTINUE', 'candidates': [
+ {'id': 'c0', 'text': 'CLICK TO CONTINUE', 'kind': 'ocr'},
+ {'id': 'c1', 'text': 'SPIN', 'kind': 'control'},
+ {'id': 'c2', 'text': 'BUY BONUS', 'kind': 'control'}
+]})
+positive = module.interpret_prediction(raw, payload, .8)
+print(json.dumps({'results': results, 'positive': positive, 'raw': original}))
+`;
+  const { results, positive, raw } = JSON.parse(execFileSync('python3', ['-c', script,
+    fileURLToPath(new URL('../python/laya_server.py', import.meta.url))], { encoding: 'utf8' }));
+  assert.deepEqual(results.map(({ label, result }) => [label, result.status]), [
+    ['SPIN', 'needs_review'], ['BUY BONUS', 'needs_review'], ['BUY BONUS TO CONTINUE', 'needs_review'],
+  ]);
+  for (const { label, result } of results) {
+    assert.equal(result.status, 'needs_review', label);
+    assert.equal(result.action, 'none', label);
+    assert.equal(result.candidateId, null, 'must not silently choose the continuation alternative');
+    assert.equal(result.reason, 'blocked_target_label', label);
+    assert.equal(result.inference, true, 'real inference remains attributed to the model');
+    assert.equal(result.confidence, 0.9579, 'keep the model confidence even when the policy rejects its target');
+    assert.deepEqual(result.details.intent, raw.answers.intent);
+    assert.deepEqual(result.details.target, raw.answers.target);
+    assert.deepEqual(result.details.usage, raw.usage);
+    assert.deepEqual(result.details.guard, {
+      candidateId: 'c0', text: label, matchedTerm: label === 'SPIN' ? 'spin' : 'buy',
+    });
+  }
+  assert.equal(positive.status, 'ok');
+  assert.equal(positive.action, 'continue');
+  assert.equal(positive.candidateId, 'c0', 'only the selected label should determine this exclusion');
+});
+
 test('sidecar deadline terminates a stuck worker and marks the runtime unavailable', () => {
   const script = `
 import importlib.util, json, multiprocessing, sys, threading, time

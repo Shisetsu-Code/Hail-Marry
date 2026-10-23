@@ -70,11 +70,18 @@ export class GameSession {
       clip.width = Math.min(viewport.width - clip.x, b.width + 16);
       clip.height = Math.min(viewport.height - clip.y, b.height + 16);
       const cropPath = path.join(this.outputDir, 'action-crop-' + this.report.actions.length + '.png');
+      const afterPath = path.join(this.outputDir, 'action-crop-' + this.report.actions.length + '-after.png');
       const first = await this.page.screenshot({ path: cropPath, clip, scale: 'css', timeout: 15000 });
       const text = await readScreenshotText(cropPath, { signal: this.signal, timeoutMs: 3000 });
-      const now = await this.page.screenshot({ clip, scale: 'css', timeout: 15000 });
+      const now = await this.page.screenshot({ path: afterPath, clip, scale: 'css', timeout: 15000 });
       const normalized = value => value.toLowerCase().replace(/\W+/g, ' ').trim();
-      if (!first.equals(now) || text.status !== 'ok' || !text.lines.some(line => normalized(line.text) === normalized(candidate.text))) {
+      const unchangedPixels = first.equals(now);
+      const textMatched = text.status === 'ok' && text.lines.some(line => normalized(line.text) === normalized(candidate.text));
+      this.event('ocr-target-verification', { candidateId: candidate.id, expectedText: candidate.text,
+        unchangedPixels, textMatched, before: path.basename(cropPath), after: path.basename(afterPath),
+        beforeSha256: createHash('sha256').update(first).digest('hex'),
+        afterSha256: createHash('sha256').update(now).digest('hex'), ocr: text });
+      if (!unchangedPixels || !textMatched) {
         throw new Error('OCR target changed before input');
       }
     } else {

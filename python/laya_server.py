@@ -17,6 +17,7 @@ import sys
 import threading
 import time
 import traceback
+import unicodedata
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from typing import Any
 
@@ -26,6 +27,11 @@ MODEL_SHA256 = "9d628fd971b700382ac6f65920a86f149777b2e748e0c955fb3b19695aa8f204
 LAYA_VERSION = "0.4.14"
 MODEL = {"id": MODEL_ID, "revision": MODEL_REVISION}
 MAX_BODY_BYTES = 65536
+# Mirror the scanner's short explicit exclusions in src/intro.mjs. This guard
+# rejects a model-selected label; it never supplies a replacement decision.
+NON_INTRO_LABEL = re.compile(
+    r"\b(buy|purchase|deposit|withdraw|wager|gamble|comprar|compra|depositar|apostar|spin|girar)\b"
+)
 
 
 def validate_payload(payload: Any) -> dict[str, Any]:
@@ -118,6 +124,16 @@ def interpret_prediction(raw: dict[str, Any], payload: dict[str, Any], min_confi
     candidate = payload["candidates"][int(target_choice.removeprefix("control_"))]
     if not candidate["text"].strip():
         return abstain("unlabelled_target", inference=True, confidence=confidence, details=details)
+    normalized = unicodedata.normalize("NFKD", candidate["text"])
+    normalized = "".join(char for char in normalized if not unicodedata.combining(char)).lower()
+    normalized = re.sub(r"[\W_]+", " ", normalized)
+    blocked = NON_INTRO_LABEL.search(normalized)
+    if blocked:
+        details["guard"] = {
+            "candidateId": candidate["id"], "text": candidate["text"],
+            "matchedTerm": blocked.group(1),
+        }
+        return abstain("blocked_target_label", inference=True, confidence=confidence, details=details)
     return {
         "status": "ok", "action": action, "candidateId": candidate["id"],
         "confidence": confidence, "inference": True, "reason": "intro_action",

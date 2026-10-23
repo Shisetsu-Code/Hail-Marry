@@ -100,6 +100,8 @@ The confidence above is illustrative. Real responses include `details` with the 
 
 `action` is `continue`, `dismiss`, or `none`. Only `status: "ok"`, real `inference: true`, a submitted `candidateId` and confidence at or above 0.80 can be actionable. Abstentions use `action: "none"` and `candidateId: null`. `no_intro` may return `status: "ok"` to indicate a completed decision with no click. Empty text/no candidates and token-limit refusals use `inference: false`. Low confidence, no target or truncated evidence after a forward pass use `inference: true` with `status: "needs_review"`.
 
+The service also rejects a model-selected label containing the scanner's explicit gameplay or purchase exclusions, such as `SPIN` or `BUY BONUS`. This produces `blocked_target_label`, retains the raw model answers and confidence, and records the rejected label in `details.guard`. It never substitutes another candidate. This boundary was added after a real mixed-candidate inference selected `SPIN` with high confidence; it does not correct that semantic error or make the mixed-candidate accuracy test pass. The short exclusion list is not universal language coverage.
+
 ```javascript
 import { LayaClient } from './src/laya-client.mjs';
 
