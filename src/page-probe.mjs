@@ -1,8 +1,9 @@
 /**
  * Serializable browser-side read-only probes. No input dispatch, event registration, focus,
- * game-state assignment, synthetic pointer, or Phaser hitTest (which writes input.localX/Y).
+ * game-state assignment, synthetic pointer, Pixi hitTest (which writes EventsTicker.pauseUpdate),
+ * or Phaser hitTest (which writes input.localX/Y).
  * Public contracts: https://pixijs.com/8.x/guides/components/events
- * https://pixijs.download/v8.10.0/docs/events.EventBoundary.html#hitTest
+ * https://pixijs.download/v8.2.1/docs/events_EventBoundary.ts.html
  * https://docs.phaser.io/api-documentation/3.90.0/class/input-inputmanager#pointWithinHitArea
  * https://layaair2.ldc2.layabox.com/api/English/Core.Sprite.html
  * UHT is a private, best-effort adapter: its flags never prove input receipt.
@@ -13,6 +14,8 @@ export function probeFrame(options = {}) {
   const maxDepth = options.maxDepth ?? 32;
   const deadline = performance.now() + (options.budgetMs ?? 100);
   const viewport = { width: window.innerWidth, height: window.innerHeight };
+  const documentEpoch = performance.timeOrigin;
+  const documentUrl = location.href;
   const controls = [];
   const coverage = { complete: true, nodesVisited: 0, engines: [], warnings: [] };
   const read = (object, key) => { try { return object?.[key]; } catch { return undefined; } };
@@ -70,13 +73,15 @@ export function probeFrame(options = {}) {
   };
   const cssPath = (element) => {
     const segments = [];
-    let chain = [], current = element, depth = 0;
+    let chain = [], current = element, depth = 0, boundedPath = true;
     while (current?.nodeType === 1 && depth++ < maxDepth) {
       const tag = current.localName;
       let index = 1;
-      for (let sibling = current.previousElementSibling; sibling; sibling = sibling.previousElementSibling) {
+      let sibling = current.previousElementSibling, siblingCount = 0;
+      for (; sibling && siblingCount++ < maxNodes; sibling = sibling.previousElementSibling) {
         if (sibling.localName === tag) index++;
       }
+      if (sibling) boundedPath = false;
       chain.unshift(`${CSS.escape(tag)}:nth-of-type(${index})`);
       if (current.parentElement) current = current.parentElement;
       else {
@@ -85,7 +90,7 @@ export function probeFrame(options = {}) {
       }
     }
     if (chain.length) segments.unshift(chain.join(' > '));
-    return { selector: segments.join(' >> '), complete: !current };
+    return { selector: segments.join(' >> '), complete: !current && boundedPath };
   };
   const labelFor = (element) => {
     const labelledBy = (element.getAttribute('aria-labelledby') || '').split(/\s+/).slice(0, 5)
@@ -134,7 +139,12 @@ export function probeFrame(options = {}) {
         if (depth < maxDepth) roots.push({ root: element.shadowRoot, depth: depth + 1 });
         else { coverage.complete = false; coverage.warnings.push('shadow-depth-limit'); }
       }
-      if (candidate(element)) attempt(() => addDom(element));
+      if (candidate(element)) {
+        try { addDom(element); } catch {
+          coverage.complete = false;
+          if (!coverage.warnings.includes('dom-probe-error')) coverage.warnings.push('dom-probe-error');
+        }
+      }
     }
   }
 
@@ -180,8 +190,8 @@ export function probeFrame(options = {}) {
     .map((name) => ({ name, value: globalValue(name) })).filter(({ value }) => value && typeof value === 'object');
   const dedupeRoots = new Set();
 
-  // Pixi v7/v8: only the existing public root boundary may establish a target. We do not
-  // construct or replace a boundary, update transforms, or call its event-dispatch methods.
+  // Pixi's public EventBoundary.hitTest changes EventsTicker.pauseUpdate. Inspect only
+  // flags and geometry; neither call the live boundary nor replace its hit-testing logic.
   for (const { name, value: app } of rawRoots) {
     if (exhausted()) break;
     const stage = read(app, 'stage'), renderer = read(app, 'renderer');
@@ -190,9 +200,7 @@ export function probeFrame(options = {}) {
     const canvas = read(app, 'canvas') || read(app, 'view') || read(renderer, 'canvas') || read(renderer, 'view');
     const screen = read(renderer, 'screen') || read(app, 'screen');
     const surface = surfaceFor(canvas, read(screen, 'width'), read(screen, 'height'));
-    const boundary = read(read(renderer, 'events'), 'rootBoundary');
-    const usableBoundary = boundary && read(boundary, 'rootTarget') === stage && typeof read(boundary, 'hitTest') === 'function';
-    coverage.engines.push({ engine: 'pixi', root: name, publicHitTest: Boolean(usableBoundary) });
+    coverage.engines.push({ engine: 'pixi', root: name, publicHitTest: false, reason: 'hit-test-mutates-events-ticker' });
     const queue = [{ node: stage, path: name, visible: true, enabled: true, depth: 0 }];
     const seen = new Set();
     while (queue.length && !exhausted()) {
@@ -213,19 +221,11 @@ export function probeFrame(options = {}) {
         const record = engineRecord({ source: 'pixi', localId: `${name}:${read(node, 'uid') ?? item.path}`,
           role: 'scene-control', label: trim(read(node, 'label')) || trim(read(node, 'name')) || 'Pixi control',
           visible, enabled: enabled && inputMode, bounds: projectRect(worldBounds, surface) }, surface);
-        if (record.visible && record.enabled && surface?.reliable && usableBoundary) {
-          const inputPoints = record.probePoints.filter((point) => hitsElement(surface.canvas, point) &&
-            attempt(() => boundary.hitTest((point.x - surface.x) / surface.sx, (point.y - surface.y) / surface.sy)) === node);
-          record.inputPoints = inputPoints; record.hitPoint = inputPoints[0] ?? null;
-          record.interactable = inputPoints.length > 0;
-          record.evidence = { kind: 'pixi-public-hit-test', receivesInput: inputPoints.length > 0,
-            reason: inputPoints.length ? 'public-event-target-match' : 'public-event-target-miss' };
-        }
         controls.push(record);
       }
       const children = read(node, 'children');
       if (Array.isArray(children) && item.depth < maxDepth) {
-        for (let index = Math.min(children.length, maxNodes - coverage.nodesVisited) - 1; index >= 0; index--) {
+        for (let index = Math.min(children.length, Math.max(0, maxNodes - coverage.nodesVisited - queue.length)) - 1; index >= 0; index--) {
           queue.push({ node: children[index], path: `${item.path}/${index}`, depth: item.depth + 1,
             visible, enabled: enabled && read(node, 'interactiveChildren') !== false });
         }
@@ -251,7 +251,7 @@ export function probeFrame(options = {}) {
       const camera = read(read(scene, 'cameras'), 'main');
       const identityCamera = camera && !read(camera, 'rotation') && !read(camera, 'scrollX') && !read(camera, 'scrollY') &&
         (read(camera, 'zoom') === 1 || read(camera, 'zoom') == null) && !read(camera, 'x') && !read(camera, 'y');
-      const queue = list.slice(0, maxNodes).map((node, i) => ({ node, path: `${si}/${i}`, depth: 0, visible: read(settings, 'visible') !== false }));
+      const queue = list.slice(0, Math.max(0, maxNodes - coverage.nodesVisited)).map((node, i) => ({ node, path: `${si}/${i}`, depth: 0, visible: read(settings, 'visible') !== false }));
       const seen = new Set();
       while (queue.length && !exhausted()) {
         const item = queue.pop(), node = item.node;
@@ -267,9 +267,9 @@ export function probeFrame(options = {}) {
         }
         const children = read(node, 'list');
         if (Array.isArray(children) && item.depth < maxDepth) {
-          for (let i = Math.min(children.length, maxNodes - coverage.nodesVisited) - 1; i >= 0; i--) queue.push({
+          for (let i = Math.min(children.length, Math.max(0, maxNodes - coverage.nodesVisited - queue.length)) - 1; i >= 0; i--) queue.push({
             node: children[i], path: `${item.path}/${i}`, visible, depth: item.depth + 1 });
-        }
+        } else if (Array.isArray(children) && children.length) { coverage.complete = false; coverage.warnings.push('phaser-depth-limit'); }
       }
     }
   }
@@ -306,17 +306,19 @@ export function probeFrame(options = {}) {
       }
       const count = read(node, 'numChildren');
       if (Number.isSafeInteger(count) && typeof read(node, 'getChildAt') === 'function' && item.depth < maxDepth) {
-        for (let i = Math.min(count, maxNodes - coverage.nodesVisited) - 1; i >= 0; i--) queue.push({
+        for (let i = Math.min(count, Math.max(0, maxNodes - coverage.nodesVisited - queue.length)) - 1; i >= 0; i--) queue.push({
           node: attempt(() => node.getChildAt(i)), path: `${item.path}/${i}`, depth: item.depth + 1, visible, enabled });
-      }
+      } else if (count > 0 && item.depth >= maxDepth) { coverage.complete = false; coverage.warnings.push('laya-depth-limit'); }
     }
   }
 
   const runtime = globalValue('globalRuntime'), sceneRoots = read(runtime, 'sceneRoots');
   if (Array.isArray(sceneRoots) && !exhausted()) {
-    coverage.engines.push({ engine: 'uht', root: 'globalRuntime.sceneRoots', publicHitTest: false,
-      reason: 'private-scene-flags-only; recursive-runtime-queries-cannot-be-preempted' });
+    const uhtCoverage = { engine: 'uht', root: 'globalRuntime.sceneRoots', publicHitTest: false,
+      reason: 'private-scene-flags-only; recursive-runtime-queries-cannot-be-preempted' };
+    coverage.engines.push(uhtCoverage);
     const uhtRoots = sceneRoots.slice(0, 3), cameras = [], canvasList = document.querySelectorAll('canvas');
+    uhtCoverage.canvasCount = canvasList.length;
     const canvas = canvasList.length === 1 ? canvasList[0] : null, screen = globalValue('UHTScreen');
     const surface = surfaceFor(canvas, read(screen, 'width') || canvas?.width, read(screen, 'height') || canvas?.height);
     const query = (go, ctor, cap = 80) => {
@@ -326,7 +328,9 @@ export function probeFrame(options = {}) {
       if (items.length > cap) { coverage.complete = false; coverage.warnings.push('uht-result-cap'); }
       return items.slice(0, cap);
     };
-    for (const root of uhtRoots) cameras.push(...query(root, globalValue('Camera'), 8));
+    // The observed game has 19 cameras; its layer-22 UI camera follows the first eight.
+    for (const root of uhtRoots) cameras.push(...query(root, globalValue('Camera'), 32));
+    uhtCoverage.camerasInspected = cameras.length;
     cameras.sort((a, b) => (read(b, 'depth') || 0) - (read(a, 'depth') || 0));
     const seen = new Set();
     for (let ri = 0; ri < uhtRoots.length && !exhausted(); ri++) {
@@ -367,15 +371,18 @@ export function probeFrame(options = {}) {
             .map((item) => trim(read(item, 'text'), 90)).filter(Boolean);
           const spriteHints = query(go, globalValue('UISprite'), 12).filter((item) => read(read(item, 'gameObject'), 'activeInHierarchy') !== false)
             .map((item) => trim(read(item, 'spriteName'), 90)).filter(Boolean);
-          controls.push(engineRecord({ source: 'uht', localId: `${ri}:${type}:${path.filter(Boolean).join('/') || index}`,
+          const geometryReason = bounds ? 'projected-collider-bounds' : !surface ? 'canvas-unresolved' :
+            !camera ? 'camera-missing-for-layer' : !colliderBounds?.center || !colliderBounds?.size ?
+              'collider-bounds-unavailable' : 'camera-projection-unavailable';
+          controls.push(engineRecord({ source: 'uht', localId: `${ri}:${type}:${index}:${path.filter(Boolean).join('/')}`,
             role: 'scene-control', label: trim(read(go, 'name')) || type, textHints: [...new Set(textHints)], spriteHints: [...new Set(spriteHints)],
-            visible, enabled, bounds }, surface));
+            visible, enabled, bounds, evidence: { geometryReason } }, surface));
         }
       }
     }
     if (sceneRoots.length > 3) { coverage.complete = false; coverage.warnings.push('uht-root-cap'); }
   }
-  return { controls, viewport, coverage, observedAt: new Date().toISOString() };
+  return { controls, viewport, coverage, documentEpoch, documentUrl, observedAt: new Date().toISOString() };
 }
 
 /** Map child-frame CSS viewport coordinates through its content box and parent occlusion. */

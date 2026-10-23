@@ -22,6 +22,17 @@ test('an Laya choice cannot escape the observed candidate list or confidence gat
   }
 });
 
+test('a short OCR continue prompt requires agreeing readings; Start remains ambiguous', () => {
+  const bounds = { x: 146, y: 559, width: 131, height: 16 };
+  const line = { text: 'CONTINUE', confidence: 95, bounds };
+  assert.deepEqual(introCandidates({ ocr: { lines: [line] } }), []);
+  assert.deepEqual(introCandidates({ ocr: { lines: [{ ...line, readings: ['warm-red', 'warm-red'] }] } }), []);
+  const candidates = introCandidates({ ocr: { lines: [{ ...line, readings: ['warm-red', 'warm-green'] }] } });
+  assert.equal(candidates.length, 1);
+  assert.equal(candidates[0].id, 'ocr:continue');
+  assert.deepEqual(introCandidates({ ocr: { lines: [{ ...line, text: 'START', readings: ['warm-red', 'warm-green'] }] } }), []);
+});
+
 test('revalidation rejects stale coordinates and text, even when IDs are reused', () => {
   const a = { id: 'a', text: 'Tap to start', bounds: { x: 20, y: 30, width: 100, height: 40 } };
   assert.equal(sameCandidate(a, { ...a, bounds: { ...a.bounds, x: 23 } }), true);

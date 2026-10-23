@@ -12,11 +12,16 @@ on:
       - 'config/**'
       - 'package*.json'
       - 'requirements-laya.txt'
+      - 'requirements-ocr.txt'
       - '.github/workflows/**'
   workflow_dispatch:
 
 permissions:
   contents: read
+
+defaults:
+  run:
+    shell: bash
 
 concurrency:
   group: hail-marry-experiment
@@ -42,7 +47,9 @@ jobs:
         with:
           python-version: '3.11'
           cache: pip
-          cache-dependency-path: requirements-laya.txt
+          cache-dependency-path: |
+            requirements-laya.txt
+            requirements-ocr.txt
       - uses: actions/cache@v4
         with:
           path: ~/.cache/huggingface
@@ -52,6 +59,7 @@ jobs:
           npm ci --ignore-scripts --no-audit --no-fund
           sudo apt-get update -qq
           sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+          python -m pip install -r requirements-ocr.txt
           npx playwright install-deps chromium
           npx playwright install chromium || python scripts/install-browser-fallback.py
       - name: Unit and browser regression tests
@@ -67,6 +75,7 @@ jobs:
           python -m pip check
           python -m pip freeze > artifacts/python-environment.txt
       - name: Start real local Laya model
+        id: laya-start
         run: |
           python -u python/laya_server.py --port 8765 --threads 2 --min-confidence 0.80 --max-state-tokens 512 > artifacts/laya-server.log 2>&1 &
           echo $! > artifacts/laya.pid
@@ -74,8 +83,10 @@ jobs:
       - name: Verify real model inference
         run: npm run test:laya 2>&1 | tee artifacts/laya-smoke.log
       - name: Verify 60-second load and dynamic action cycle
+        if: ${{ !cancelled() && steps.laya-start.outcome == 'success' }}
         run: npm run test:integration 2>&1 | tee artifacts/integration.log
       - name: Observe three public demos concurrently
+        if: ${{ !cancelled() && steps.laya-start.outcome == 'success' }}
         run: npm run probe -- --config config/demos.json --concurrency 3 2>&1 | tee artifacts/live.log
       - name: Report measured results
         if: always()

@@ -1,10 +1,11 @@
 import { probeFrame, projectThroughFrame } from './page-probe.mjs';
 
-const OBSERVABLE_INPUT = new Set(['dom-hit-test', 'pixi-public-hit-test']);
+const OBSERVABLE_INPUT = new Set(['dom-hit-test']);
 const DEFAULTS = Object.freeze({ sampleGapMs: 300, scanTimeoutMs: 5_000, maxFrames: 24,
   maxControls: 250, maxNodes: 4_000, maxDepth: 32, frameBudgetMs: 100, boundsTolerancePx: 3 });
 
 function equalBounds(a, b, tolerance) {
+  if (a === null && b === null) return true;
   return a && b && ['x', 'y', 'width', 'height'].every((key) =>
     Number.isFinite(a[key]) && Number.isFinite(b[key]) && Math.abs(a[key] - b[key]) <= tolerance);
 }
@@ -23,12 +24,15 @@ export function reconcileSamples(first, second, { boundsTolerancePx = 3 } = {}) 
     const before = previous.get(after.id);
     const gapMs = before ? Date.parse(after.observedAt) - Date.parse(before.observedAt) : NaN;
     const timingValid = Number.isFinite(gapMs) && gapMs >= 200 && gapMs <= 400;
-    const sameIdentity = before && before.source === after.source && before.label === after.label && before.role === after.role;
+    const sameIdentity = before && before.source === after.source && before.label === after.label && before.role === after.role &&
+      before.frameUrl === after.frameUrl && before.documentEpoch === after.documentEpoch;
     const sameState = before && !stateChanged(before, after);
     const sameBounds = before && equalBounds(before.bounds, after.bounds, boundsTolerancePx);
     const stable = Boolean(before && sameIdentity && sameState && sameBounds && timingValid);
     const observedInput = (value) => value?.visible === true && value?.enabled === true &&
       value?.interactable === true && value?.geometryReliable === true &&
+      value?.bounds && ['x', 'y', 'width', 'height'].every((key) => Number.isFinite(value.bounds[key])) &&
+      value.bounds.width > 0 && value.bounds.height > 0 &&
       value?.evidence?.receivesInput === true && OBSERVABLE_INPUT.has(value?.evidence?.kind);
     const blocked = [after.visible, after.enabled, after.interactable].includes(false);
     const availability = blocked ? 'unavailable' : stable && observedInput(before) && observedInput(after) ? 'available' : 'unknown';
@@ -78,7 +82,13 @@ function bounded(operation, deadline, signal) {
       reject(error);
     }, Math.max(0, deadline - Date.now()));
     signal?.addEventListener('abort', onAbort, { once: true });
-    Promise.resolve().then(operation).then((value) => { cleanup(); resolve(value); }, (error) => { cleanup(); reject(error); });
+    Promise.resolve().then(() => {
+      checkAbort(signal);
+      if (Date.now() >= deadline) {
+        const error = new Error('Read-only scan deadline exceeded'); error.name = 'ScanTimeoutError'; throw error;
+      }
+      return operation();
+    }).then((value) => { cleanup(); resolve(value); }, (error) => { cleanup(); reject(error); });
   });
 }
 
@@ -157,7 +167,9 @@ export class ControlStateDetector {
             const mapping = await bounded(() => handle.evaluate(projectThroughFrame, { controls: projected, viewport: localViewport }), deadline, signal);
             projected = mapping.controls;
             localViewport = mapping.viewport;
-          } finally { await handle.dispose().catch(() => {}); }
+          } finally {
+            await bounded(() => handle.dispose(), Date.now() + 100, undefined).catch(() => {});
+          }
           child = child.parentFrame();
         }
         viewport ??= localViewport;
@@ -167,8 +179,8 @@ export class ControlStateDetector {
             x: bounds.x / localViewport.width, y: bounds.y / localViewport.height,
             width: bounds.width / localViewport.width, height: bounds.height / localViewport.height,
           } : null;
-          controls.push({ ...control, id: `${frameId}:${control.source}:${control.localId}`, frameId, frameIndex,
-            frameUrl: frame.url(), normalizedBounds,
+          controls.push({ ...control, id: `${frameId}:${control.source}:${scan.documentEpoch}:${control.localId}`, frameId, frameIndex,
+            frameUrl: scan.documentUrl, documentEpoch: scan.documentEpoch, normalizedBounds,
             normalizedPoint: control.hitPoint && control.geometryReliable ? {
               x: control.hitPoint.x / localViewport.width, y: control.hitPoint.y / localViewport.height,
             } : null });

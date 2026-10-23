@@ -110,14 +110,15 @@ export class GameSession {
       }
       let decision;
       const modelCandidates = candidates.map(({ text, kind }, i) => ({ id: 'c' + i, text: text.slice(0, 160), kind }));
+      const modelInput = { text: modelCandidates.map(c => c.text).join('\n'), candidates: modelCandidates };
       try {
         // Candidate-centered context avoids unrelated catalogue prose exhausting the model window.
-        decision = await this.laya.classifyIntro({ text: modelCandidates.map(c => c.text).join('\n'), candidates: modelCandidates });
+        decision = await this.laya.classifyIntro(modelInput);
       } catch (error) {
         this.report.errors.push({ phase: 'laya', message: String(error.message).slice(0, 500) });
         return state;
       }
-      this.event('laya-decision', { decision });
+      this.event('laya-decision', { input: modelInput, decision });
       const modelChoice = validateDecision(decision, modelCandidates);
       const chosen = modelChoice ? candidates[modelCandidates.indexOf(modelChoice)] : null;
       if (!chosen) return state;

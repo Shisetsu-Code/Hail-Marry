@@ -53,11 +53,42 @@ test('private engine flags remain unknown even when their booleans are stable', 
   assert.equal(result.controls[0].interactable, null);
 });
 
+test('legacy Pixi hit-test evidence cannot establish read-only availability', () => {
+  const pixi = control({ source: 'pixi', evidence: { kind: 'pixi-public-hit-test', receivesInput: true } });
+  const result = reconcileSamples(...samples([pixi], [pixi]));
+  assert.equal(result.controls[0].availability, 'unknown');
+});
+
 test('large geometry changes prevent availability but preserve the moved control', () => {
   const moved = control({ bounds: { x: 130, y: 80, width: 60, height: 30 } });
   const result = reconcileSamples(...samples([control()], [moved]));
   assert.equal(result.controls[0].availability, 'unknown');
   assert.equal(result.transient[0].reason, 'bounds-changed');
+});
+
+test('unchanged hidden controls with null bounds are stable rather than moved transients', () => {
+  const hidden = control({ source: 'uht', bounds: null, geometryReliable: false,
+    visible: false, interactable: false, evidence: { kind: 'engine-flags', receivesInput: false } });
+  const result = reconcileSamples(...samples([hidden], [hidden]));
+  assert.equal(result.controls[0].stable, true);
+  assert.equal(result.controls[0].availability, 'unavailable');
+  assert.equal(result.transient.length, 0);
+});
+
+test('unchanged unknown geometry remains stable evidence with unknown availability', () => {
+  const unknown = control({ source: 'uht', bounds: null, geometryReliable: false,
+    interactable: null, evidence: { kind: 'engine-flags', receivesInput: null } });
+  const result = reconcileSamples(...samples([unknown], [unknown]));
+  assert.equal(result.controls[0].stable, true);
+  assert.equal(result.controls[0].availability, 'unknown');
+  assert.equal(result.transient.length, 0);
+});
+
+test('null geometry cannot establish availability even with positive input flags', () => {
+  const missingBounds = control({ bounds: null });
+  const result = reconcileSamples(...samples([missingBounds], [missingBounds]));
+  assert.equal(result.controls[0].stable, true);
+  assert.equal(result.controls[0].availability, 'unknown');
 });
 
 test('samples outside the 200–400 ms window cannot establish availability', () => {

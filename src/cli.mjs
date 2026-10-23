@@ -48,10 +48,11 @@ try {
         state = await session.actOnControl(controls[0]);
       }
       const available = state.controls.filter(c => c.availability === 'available');
-      const hasRuntimeControl = available.some(c => !['dom', undefined].includes(c.source));
+      const inputControlsObserved = available.length > 0;
+      const stableEnabledCandidates = state.controls.filter(c => c.stable && c.visible === true && c.enabled === true).length;
       const pendingIntro = introStillPresent(state);
-      const status = session.report.errors.length ? 'needs_review' : pendingIntro ? 'intro_pending' : hasRuntimeControl ? 'runtime_controls_observed' : 'needs_review';
-      return { id, provider: target.provider, status, available: available.length, controls: state.controls.length, transient: state.transient.length, actions: session.report.actions.length, coverage: state.coverage, report: id + '/report.json' };
+      const status = session.report.errors.length ? 'needs_review' : pendingIntro ? 'intro_pending' : inputControlsObserved ? 'input_controls_observed' : 'needs_review';
+      return { id, provider: target.provider, status, available: available.length, stableEnabledCandidates, controls: state.controls.length, transient: state.transient.length, actions: session.report.actions.length, coverage: state.coverage, report: id + '/report.json' };
     } catch (error) {
       session.report.errors.push({ phase: 'session', message: String(error.message) });
       return { id, status: 'failed', error: String(error.message), report: id + '/report.json' };
@@ -66,7 +67,7 @@ try {
 const summary = { elapsedMs: Date.now() - started, concurrency: limit, initialWaitMs, results };
 await writeFile(path.join(outputDir, 'summary.json'), JSON.stringify(summary, null, 2) + '\n');
 process.stdout.write(JSON.stringify(summary, null, 2) + '\n');
-if (!results.some(result => result.value?.status === 'runtime_controls_observed')) process.exitCode = 2;
+if (!results.some(result => result.value?.status === 'input_controls_observed')) process.exitCode = 2;
 
 function introStillPresent(state) {
   return introCandidates(state).length > 0;

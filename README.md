@@ -13,13 +13,15 @@ Detector dinámico de controles de juegos. Prueba inicial en GitHub Actions.
 
 Los tres juegos se cargan en paralelo, con contextos separados. Comparten Chromium y una instancia de Laya; sólo la inferencia se serializa para no saturar la CPU.
 
+El OCR combina lectura de texto disperso y por bloques con dos máscaras de contraste de color. Usa un hilo por proceso y conserva las coordenadas originales. Un «CONTINUE» sin más contexto sólo se propone a Laya cuando al menos dos lecturas coinciden; la decisión sigue sujeta a confianza y revalidación.
+
 ## Interpretar los resultados
 
 Cada control tiene visible, enabled, interactable, stable, bounds, normalizedBounds, hitPoint y evidencia de origen.
 
 | availability | Evidencia |
 |---|---|
-| available | Coincidencia en ambas muestras y recepción de input verificada por DOM o hit-test público compatible |
+| available | Coincidencia en ambas muestras y recepción de input verificada mediante hit-test DOM |
 | unavailable | Oculto, deshabilitado, fuera de pantalla o bloqueado según la evidencia disponible |
 | unknown | Muestras insuficientes, geometría incierta o estado interno que no demuestra recepción de input |
 
@@ -27,7 +29,7 @@ La lista transient conserva controles que aparecieron, desaparecieron, se movier
 
 El Canvas completo nunca se trata como un botón. Los textos OCR no son automáticamente controles habilitados. Un input enviado no demuestra el resultado de una tirada; actionConfirmed permanece separado.
 
-Adaptadores: DOM, Pixi accesible, Phaser, LayaAir y UHT/globalRuntime de Pragmatic. Los tres últimos pueden aportar candidatos y estados sin confirmar recepción de input. **LayaAir, el motor, y Laya, el modelo de decisión, son componentes distintos.** Los árboles privados y ciertos controles sin texto quedan pendientes.
+Adaptadores: DOM, Pixi accesible, Phaser, LayaAir y UHT/globalRuntime de Pragmatic. Los adaptadores de motor aportan candidatos y estados sin confirmar recepción de input. No se invoca el hit-test de Pixi porque modifica su ticker de eventos. **LayaAir, el motor, y Laya, el modelo de decisión, son componentes distintos.** Los árboles privados y ciertos controles sin texto quedan pendientes.
 
 ## GitHub Actions
 
@@ -35,7 +37,7 @@ Abrir **Actions → Dynamic controls experiment → Run workflow**. También se 
 
 Instala Node 22, Python 3.11, Chromium, Tesseract y Laya CPU con checkpoint fijado. Comprueba DOM/iframes/overlays/flicker, inferencia real, una fixture con espera real de 60 s y tres DEMOs: Pragmatic, Play’n GO móvil y BGaming.
 
-El artefacto **hail-marry-evidence** contiene logs, PNG, resultados JSON y versiones Python. Si ninguna DEMO demuestra controles de runtime disponibles, la sonda termina con código 2 y conserva evidencia.
+El artefacto **hail-marry-evidence** contiene logs, PNG, resultados JSON y versiones Python. Se contabilizan por separado los candidatos estables visibles/habilitados y los controles con recepción de input confirmada. Si ninguna DEMO demuestra controles disponibles, la sonda termina con código 2 y conserva evidencia.
 
 ## Reproducir en Linux
 
@@ -44,6 +46,7 @@ El artefacto **hail-marry-evidence** contiene logs, PNG, resultados JSON y versi
     sudo apt-get install tesseract-ocr tesseract-ocr-eng
     python -m venv .venv
     . .venv/bin/activate
+    python -m pip install -r requirements-ocr.txt
     python -m pip install torch==2.8.0+cpu --index-url https://download.pytorch.org/whl/cpu
     python -m pip install -r requirements-laya.txt
     python python/laya_server.py --port 8765 --threads 2

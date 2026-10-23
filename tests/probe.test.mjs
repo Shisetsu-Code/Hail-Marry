@@ -158,6 +158,34 @@ test('bounded private UHT contract inspection preserves button identity and neve
   });
 });
 
+test('UHT projects controls using a matching camera beyond the first eight candidates', async () => {
+  await withPage(async (page) => {
+    await page.setContent('<canvas width="800" height="600" style="position:absolute;left:0;top:0"></canvas>');
+    await page.evaluate(() => {
+      window.XTButton = function XTButton() {};
+      window.Camera = function Camera() {};
+      const go = { name: 'StartSpin_Button', activeInHierarchy: true, layer: 22,
+        collider: { enabled: true, GetTransformedCenterAndSize: () => ({ center: { x: 100, y: 80, z: 0 }, size: { x: 60, y: 30, z: 0 } }) } };
+      go.transform = { gameObject: go, parent: null };
+      const button = { gameObject: go, enabled: true, xtEnabled: true };
+      const cameras = Array.from({ length: 12 }, (_, depth) => ({ enabled: true, cullingMask: 1, depth,
+        WorldToScreenPoint: (point) => point }));
+      cameras.push({ enabled: true, cullingMask: 4194304, depth: 20, WorldToScreenPoint: (point) => point });
+      window.globalRuntime = { sceneRoots: [{ GetComponentsInChildren: (type) =>
+        type === window.XTButton ? [button] : type === window.Camera ? cameras : [] }] };
+      window.UHTScreen = { width: 800, height: 600 };
+    });
+    const result = await new ControlStateDetector({ frameBudgetMs: 500 }).observe(page);
+    const control = result.controls.find((entry) => entry.source === 'uht');
+    assert.deepEqual(control.bounds, { x: 70, y: 65, width: 60, height: 30 });
+    assert.equal(control.availability, 'unknown');
+    const coverage = result.coverage.samples[1].frames[0].engines.find((entry) => entry.engine === 'uht');
+    assert.equal(coverage.camerasInspected, 13);
+    assert.equal(coverage.canvasCount, 1);
+    assert.equal(control.evidence.geometryReason, 'projected-collider-bounds');
+  });
+});
+
 test('a canvas with a blanket click handler is still a surface rather than a detected control', async () => {
   await withPage(async (page) => {
     await page.setContent('<canvas role="button" onclick="window.actions++" width="400" height="300"></canvas>');
@@ -166,7 +194,7 @@ test('a canvas with a blanket click handler is still a surface rather than a det
   });
 });
 
-test('Pixi public hit evidence respects a disabled containing surface', async () => {
+test('Pixi flags respect a disabled containing surface', async () => {
   await withPage(async (page) => {
     await page.setContent('<div aria-disabled="true"><canvas width="800" height="600" style="position:absolute;left:0;top:0"></canvas></div>');
     await page.evaluate(() => {
@@ -181,5 +209,37 @@ test('Pixi public hit evidence respects a disabled containing surface', async ()
     assert.equal(control.enabled, false);
     assert.equal(control.interactable, false);
     assert.equal(control.availability, 'unavailable');
+  });
+});
+
+test('Pixi observation never calls a hit-test method that mutates event scheduling', async () => {
+  await withPage(async (page) => {
+    await page.setContent('<canvas width="800" height="600" style="position:absolute;left:0;top:0"></canvas>');
+    await page.evaluate(() => {
+      window.hitTestCalls = 0;
+      window.tickerState = { pauseUpdate: false };
+      const button = { uid: 4, name: 'Spin', eventMode: 'static', visible: true, children: [],
+        getBounds: () => ({ x: 40, y: 30, width: 80, height: 40 }) };
+      const stage = { visible: true, eventMode: 'passive', children: [button] };
+      window.__PIXI_APP__ = { stage, canvas: document.querySelector('canvas'), renderer: { screen: { width: 800, height: 600 },
+        events: { rootBoundary: { rootTarget: stage, hitTest: () => {
+          window.hitTestCalls++;
+          window.tickerState.pauseUpdate = true;
+          return button;
+        } } } } };
+    });
+    const result = await new ControlStateDetector({ frameBudgetMs: 500 }).observe(page);
+    assert.deepEqual(await page.evaluate(() => ({ calls: window.hitTestCalls, paused: window.tickerState.pauseUpdate })),
+      { calls: 0, paused: false });
+    const control = result.controls.find((entry) => entry.source === 'pixi');
+    assert.equal(control.enabled, true);
+    assert.equal(control.visible, true);
+    assert.deepEqual(control.bounds, { x: 40, y: 30, width: 80, height: 40 });
+    assert.equal(control.interactable, null);
+    assert.equal(control.evidence.receivesInput, null);
+    assert.equal(control.availability, 'unknown');
+    const coverage = result.coverage.samples[1].frames[0].engines.find((entry) => entry.engine === 'pixi');
+    assert.equal(coverage.publicHitTest, false);
+    assert.equal(coverage.reason, 'hit-test-mutates-events-ticker');
   });
 });

@@ -14,7 +14,8 @@ export function introCandidates(state) {
   }
   for (const line of state.ocr?.lines ?? []) {
     const normalized = clean(line.text);
-    if (line.confidence < 65 || !boundsOkay(line.bounds) || forbidden.test(normalized) || !explicit.test(normalized)) continue;
+    const agreedShort = short.test(normalized) && new Set(line.readings ?? []).size >= 2;
+    if (line.confidence < 65 || !boundsOkay(line.bounds) || forbidden.test(normalized) || !(explicit.test(normalized) || agreedShort)) continue;
     if (!candidates.some(c => clean(c.text) === normalized)) candidates.push({ id: 'ocr:' + normalized, text: line.text, kind: 'ocr', bounds: line.bounds });
   }
   return candidates.slice(0, 8);
