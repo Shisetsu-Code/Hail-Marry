@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { classifyHint, discoverActions, demoMode, matchRoute, routeAllowed, stateFingerprint, screenPacket } from '../src/navigation-policy.mjs';
+import { classifyHint, discoverActions, demoMode, matchRoute, routeAllowed, stateFingerprint, screenPacket, isPurchaseConfirmationState } from '../src/navigation-policy.mjs';
 import { GPTTextClassifier, ReviewStore, normalizeClassification } from '../src/gpt-review.mjs';
 import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -72,6 +72,13 @@ test('state signature changes with modal controls and packet persists screen tex
   assert.ok(packet.candidates.some(c=>c.kind==='bonus_option'));
 });
 
+test('BFS state fingerprint keeps bet levels while ignoring unrelated changing counters', () => {
+  const line = text => ({ text, confidence: 90, bounds: { x: 20, y: 40, width: 150, height: 25 }, readings: ['a','b'] });
+  const base = [dom('bet','Bet +')];
+  assert.notEqual(stateFingerprint(scene(base,[line('Bet level 1')])), stateFingerprint(scene(base,[line('Bet level 2')])));
+  assert.equal(stateFingerprint(scene(base,[line('Balance 1000')])), stateFingerprint(scene(base,[line('Balance 1002')])));
+});
+
 test('GPT accepts only observed IDs; queue remains honest when no key is configured',async()=>{
   const state=scene([dom('buy','Buy Bonus')], [{text:'Welcome to FUN Demo',confidence:91,bounds:{x:10,y:10,width:220,height:20},readings:['a','b']}]);
   const packet=screenPacket(state,discoverActions(state),[]);
@@ -106,4 +113,40 @@ test('GPT structured output can label a new control but is not allowed to invent
   assert.equal(actions[0].gptDriven,true);
   assert.ok(matchRoute(state,{...actions[0],gptDriven:true}));
   assert.equal(actions[0].point.x,140);
+});
+
+test('UHT buy dialog YES/NO are protected confirmation controls, never new bonus routes', () => {
+  const base = 'GameRoot/UI Root/XTRoot/Root/Game/BuyFeature/ContentBuyFeature';
+  const engine = (label, suffix, x) => dom(label, label, {
+    source: 'uht', localId: `1:UIButton:12:${base}/Buttons/${suffix}`,
+    availability: 'unknown', hitPoint: null,
+    bounds: {x,y:260,width:75,height:75},
+  });
+  const state = scene([
+    engine('Button_Yes','Button_Yes',560),
+    engine('Button_No','Button_No',260),
+    engine('ButtonCollider','Button/ButtonCollider',780),
+  ]);
+  assert.equal(classifyHint(`${base}/Buttons/Button_Yes`), 'purchase_confirm');
+  assert.equal(classifyHint(`${base}/Buttons/Button_No`), 'close_back');
+  const actions = discoverActions(state, {gptKinds:{
+    'Button_Yes':{kind:'bonus_entry',confidence:1},
+    'Button_No':{kind:'bonus_option',confidence:1},
+  }});
+  assert.equal(actions.find(a => a.text === 'Button_Yes')?.kind, 'purchase_confirm');
+  assert.equal(actions.find(a => a.text === 'Button_No')?.kind, 'close_back');
+  assert.equal(actions.find(a => a.text === 'ButtonCollider')?.kind, 'bonus_entry');
+  for (const action of actions.filter(a=>/Button_(Yes|No)/.test(a.text))) {
+    assert.equal(routeAllowed(action,{demo:true,initiateDemoPurchase:true}),false);
+    assert.equal(matchRoute(state,{...action,kind:'bonus_entry',gptDriven:false}),null);
+  }
+});
+
+test('purchase modal stops traversal of underlying bet and bonus controls', () => {
+  const base = scene([dom('buy','Buy Bonus'),dom('yes','Confirm purchase'),dom('bet','Bet +')]);
+  const controls = discoverActions(base);
+  assert.equal(isPurchaseConfirmationState(controls, []), false);
+  assert.equal(isPurchaseConfirmationState(controls, [{kind:'bonus_entry'}]), true);
+  assert.equal(isPurchaseConfirmationState(controls, [{kind:'bonus_option'}]), true);
+  assert.equal(isPurchaseConfirmationState(controls.filter(c => c.text !== 'Confirm purchase'), [{kind:'bonus_entry'}]), false);
 });

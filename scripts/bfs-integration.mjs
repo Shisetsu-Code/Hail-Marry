@@ -23,6 +23,7 @@ try {
   assert.ok(result.metrics.discoveredBonusOptions>=2,'should discover at least 2 bonus choices');
   assert.ok(result.metrics.demoPurchaseOptionsVisited>=2,'should independently open both bonus options');
   assert.ok(result.metrics.purchaseConfirmationsBlocked>=1,'final purchase confirmation must be observed but NEVER clicked');
+  assert.ok(result.metrics.purchaseDialogsOpened>=2,'two selected FUN bonus dialogs must be recognized and terminate traversal');
   assert.ok(!result.nodes.some(n=>['spin','autoplay','purchase_confirm'].includes(n.via?.kind)), 'no spin, autoplay or final purchase');
   const review=JSON.parse(await readFile(outputDir+'/review/gpt-review-index.json','utf8'));
   assert.ok(review.total>=3,'new screen texts queued for GPT');

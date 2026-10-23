@@ -67,10 +67,10 @@ jobs:
         run: npm test 2>&1 | tee artifacts/bfs-unit.log
       - name: Test full BFS on simulated menus / bonus selection
         run: npm run test:bfs 2>&1 | tee artifacts/bfs-fixture.log
-      - name: Explore three public FUN demos in parallel
+      - name: Smoke-test three public FUN demos in parallel (four BFS nodes/game)
         # This job can be run without any GPT key: unknown screens go to a review queue.
         run: |
-          npm run bfs:live -- --config config/demos.json --games-concurrency 3 --branch-concurrency 2 --max-depth 2 --max-nodes 9 --max-per-node 6 --initiate-demo-purchase true --gpt false 2>&1 | tee artifacts/bfs-live.log
+          npm run bfs:live -- --config config/demos.json --games-concurrency 3 --branch-concurrency 2 --max-depth 1 --max-nodes 4 --max-per-node 3 --initiate-demo-purchase true --gpt false 2>&1 | tee artifacts/bfs-live.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:

@@ -50,3 +50,16 @@ The simulated fixture has two separate FUN bonus options, a delayed menu, bet ad
 Live results depend on accessible DOM/engine internals, OCR quality and geometry. The `unknown` state is not treated as confirmed availability. A screenshot with only `CONTINUE` can be advanced cautiously, but engine-private hit areas and unsupported transforms can still block a route.
 
 This first implementation favors bounded accuracy over throughput. Context-per-BFS-branch reloading uses 60 seconds repeatedly; a future optimization can reuse reversible menu paths within one live session, while keeping fresh-context replay as recovery. The graph reports truncated frontiers and failures so missing branches are not silently called complete.
+
+## Measured public-demo baseline (GitHub Actions 40032911477)
+
+The baseline run passed all deterministic tests and the browser fixture, and the workflow itself was green; **real-provider exploration was partial**. The artifact contains per-node screenshots, OCR, input evidence, route graph, and pending GPT review requests.
+
+- Controlled browser fixture: two simulated FUN bonus options reached; one final purchase confirmation blocked; 12 bet and seven ante control encounters across nodes; eight new text-review packets.
+- Pragmatic 3 Dancing Monkeys: nine BFS visits (eight distinct observed states), 11 dispatched inputs including replays, and a screenshot proving the **BUY FREE SPINS $180** dialog was opened. Bet changes were observed, but **no final simulated purchase was executed**, no separate bonus options were verified, and no ante control was detected. The original run mistakenly interpreted private-engine `Button_Yes` / `Button_No` as new bonus entries because their ancestor contained `BuyFeature`; this is now explicitly blocked and covered by tests. The purchase dialog is terminal; underlying bet controls remain untrusted while the modal is visible.
+- BGaming Three Lucky Monkeys: `CLICK ANYWHERE TO START` was clicked and the intro advanced (one dispatched input), but no actionable bonus/bet controls were exposed afterward.
+- Play’n GO Amulet of Dead mobile: zero interactions and no confirmed bonus/bet controls; the tutorial/intro remained unresolved.
+
+The full baseline run used nine nodes max per public game; fresh-context replay took about eleven minutes for the whole workflow. Subsequent push CI uses four nodes max and depth one for a faster real-provider smoke test, not exhaustive BFS. For deeper exploration, use the full explicit CLI in the Run section.
+
+The classification queue is not an automatic ChatGPT session connector; unattended model classification requires an explicitly configured API credential. Missing credentials leave review packets pending, with no forged GPT decisions.

@@ -4,7 +4,7 @@ import { GameSession } from './session.mjs';
 import { introCandidates, sameCandidate } from './intro.mjs';
 import { delay, mapConcurrent } from './timing.mjs';
 import { demoLaunchUrl } from './launcher.mjs';
-import { discoverActions, demoMode, matchRoute, routeAllowed, screenPacket, stateFingerprint, normalizeText } from './navigation-policy.mjs';
+import { discoverActions, demoMode, matchRoute, routeAllowed, screenPacket, stateFingerprint, normalizeText, isPurchaseConfirmationState } from './navigation-policy.mjs';
 import { ReviewStore } from './gpt-review.mjs';
 
 const humanError = e => String(e?.message || e).slice(0, 320);
@@ -117,6 +117,13 @@ export class BFSNavigator {
     for (let i=0; i<3; i++) {
       const candidates = introCandidates(state);
       if (!candidates.length) break;
+      if (routePath.some(route => route.kind === 'bonus_entry' || route.kind === 'bonus_option')) {
+        // A bare CONTINUE after choosing a bonus can be a purchase confirmation,
+        // not a startup instruction. Record it but never advance automatically.
+        await this.#queueState(state, routePath);
+        this.event('bfs-purchase-prompt-needs-review', { text: candidates.map(c => c.text) });
+        break;
+      }
       const { classification } = await this.#queueState(state, routePath);
       const eligible = candidates.filter(c => isSafeIntro(c, state, { classification }));
       if (eligible.length !== 1) {
@@ -170,12 +177,20 @@ export class BFSNavigator {
       }
       const fingerprint = stateFingerprint(state);
       const { packet, classification, actions } = await this.#queueState(state, task.path);
-      const available = actions.filter(candidate => routeAllowed(candidate, { demo: this.demo,
+      // In a demo purchase dialog, engine flags may report Bet +/- and other
+      // covered controls as enabled. Do not explore beneath the confirmation.
+      const purchaseDialogOpen = isPurchaseConfirmationState(actions, task.path);
+      if (purchaseDialogOpen) this.event('bfs-purchase-dialog-opened', { nodeId: id,
+        via: task.path.at(-1)?.kind, candidates: actions.filter(a => a.kind === 'purchase_confirm').map(a => a.text).slice(0, 8) });
+      const available = purchaseDialogOpen ? [] : actions.filter(candidate => routeAllowed(candidate, { demo: this.demo,
         initiateDemoPurchase: this.initiateDemoPurchase, ancestry: task.path }));
-      return { id, status: 'observed', fingerprint, packet, classification,
+      const blocked = actions.filter(c => !available.includes(c)).sort((a,b) =>
+        Number(b.kind === 'purchase_confirm') - Number(a.kind === 'purchase_confirm') ||
+        Number(b.kind === 'close_back') - Number(a.kind === 'close_back'));
+      return { id, status: 'observed', fingerprint, packet, classification, purchaseDialogOpen,
         state: { screenshot: path.join(id,state.screenshot), ocrText:packet.text.slice(0,1500), controls: state.controls.length,
           stable: state.controls.filter(c => c.stable).length, coverageComplete: state.coverage?.complete === true },
-        eligible: available, otherCandidates: actions.filter(c => !available.includes(c)).slice(0,24).map(cleanRoute),
+        eligible: available, otherCandidates: blocked.slice(0,30).map(cleanRoute),
         path: task.path, actionsDispatched: session.report.actions.filter(a => a.inputDispatched).length };
     } catch (error) {
       return { id, status:'failed', path:task.path, error:humanError(error), screenshot:state?.screenshot || null };
@@ -188,7 +203,7 @@ export class BFSNavigator {
   async run() {
     await mkdir(this.outputDir,{recursive:true});
     if (!this.demo) { this.graph.errors.push({phase:'guard',message:'BFS requires a verified FUN/DEMO/practice URL'}); await this.save(); return this.graph; }
-    let frontier=[{path:[]}], visitedPaths=new Set(['root']), expanded=0, exploredEdges=0;
+    let frontier=[{path:[]}], visitedPaths=new Set(['root']), expanded=0, exploredEdges=0, depthLimitReached=false;
     for (let depth=0; depth<=this.maxDepth && frontier.length && expanded < this.maxNodes; depth++) {
       const wave=frontier.slice(0, this.maxNodes - expanded);
       this.event('bfs-wave', { depth, nodes:wave.length });
@@ -200,7 +215,7 @@ export class BFSNavigator {
         const parent=pathEdges.length>0 ? pathEdges.slice(0,-1).map(e=>e.routeKey).join('>') || 'root' : null;
         const pathKey=pathEdges.map(e=>e.routeKey).join('>') || 'root';
         const rawNode={ id:outcome.id, path: pathEdges, pathKey, parentPathKey:parent, via:pathEdges.at(-1) || null,
-          status:outcome.status, fingerprint:outcome.fingerprint || null,
+          status:outcome.status, purchaseDialogOpen:outcome.purchaseDialogOpen===true, fingerprint:outcome.fingerprint || null,
           screenshot:outcome.state?.screenshot || outcome.screenshot || null,
           ocrText:outcome.state?.ocrText || '', controls:outcome.state?.controls || 0,
           coverageComplete:outcome.state?.coverageComplete || false, error:outcome.error || null,
@@ -218,6 +233,7 @@ export class BFSNavigator {
             result:rawNode.status, changed: rawNode.status==='observed' || rawNode.status==='duplicate_state' });
           exploredEdges++;
         }
+        if (depth === this.maxDepth && (outcome.eligible || []).length) depthLimitReached=true;
         if (rawNode.status!=='observed' || depth === this.maxDepth) continue;
         for(const candidate of (outcome.eligible || []).slice(0,this.maxPerNode)) {
           const edge=cleanRoute(candidate);
@@ -242,8 +258,9 @@ export class BFSNavigator {
       discoveredBetControls:counted.reduce((a,n)=>a+n.eligible.filter(x=>x.kind==='bet_adjust').length,0),
       discoveredAnteControls:counted.reduce((a,n)=>a+n.eligible.filter(x=>x.kind==='ante_toggle').length,0),
       demoPurchaseOptionsVisited:all.filter(n=>['observed','duplicate_state'].includes(n.status) && n.via?.kind==='bonus_option').length,
+      purchaseDialogsOpened:all.filter(n=>n.purchaseDialogOpen===true).length,
       purchaseConfirmationsBlocked:counted.reduce((a,n)=>a+n.blocked.filter(x=>x.kind==='purchase_confirm').length,0),
-      pendingFrontier:frontier.length, truncated:frontier.length>0 || expanded>=this.maxNodes,
+      pendingFrontier:frontier.length, depthLimitReached, truncated:frontier.length>0 || expanded>=this.maxNodes || depthLimitReached,
       // Action dispatch and effect evidence are kept separate in each node report.
     };
     this.graph.finishedAt=new Date().toISOString();

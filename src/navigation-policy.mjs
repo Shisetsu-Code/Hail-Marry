@@ -27,6 +27,16 @@ export function demoMode(url, { localFixture = false } = {}) {
 export function classifyHint(value) {
   const t = normalizeText(value);
   if (!t) return 'unknown';
+  // UHT draws the free-spins purchase dialog as private scene controls named
+  // Button_Yes and Button_No. Ancestors contain `BuyFeature`; that MUST NOT
+  // classify these final-confirmation buttons as a fresh bonus entry.
+  // The same guard applies to other engines and to GPT-suggested route labels.
+  if (/\b(?:button|btn)\s+(?:yes|ok|accept|agree|confirm|si)\b/.test(t)) return 'purchase_confirm';
+  if (/\b(?:button|btn)\s+(?:no|cancel|reject|decline)\b/.test(t)) return 'close_back';
+  if (/(buy.?feature|bonus.?buy|buy.?bonus|purchase.?bonus|confirm\s+(?:buy|purchase))/.test(t) &&
+      /\b(?:yes|accept|agree|confirm|si)\b/.test(t)) return 'purchase_confirm';
+  if (/(buy.?feature|bonus.?buy|buy.?bonus|purchase.?bonus)/.test(t) &&
+      /\b(?:no|cancel|decline|reject)\b/.test(t)) return 'close_back';
   if (/\b(confirm|confirmar|purchase now|pay now|comprar ahora|confirm purchase|confirm buy|accept purchase|aceptar compra|comprar por)\b/.test(t)) return 'purchase_confirm';
   if (/\b(spin|startspin|start spin|girar|tirar|tirada|jugar giro)\b/.test(t)) return 'spin';
   if (/\b(auto.?play|auto.?spin|autoplay)\b/.test(t)) return 'autoplay';
@@ -112,6 +122,15 @@ export function discoverActions(state, { gptKinds = {}, allowEngine = true } = {
   return unique.sort((a, b) => (PRIORITY[a.kind] ?? 99) - (PRIORITY[b.kind] ?? 99) || a.routeKey.localeCompare(b.routeKey));
 }
 
+/** A purchase confirmation is a terminal BFS stage: reaching it establishes
+ * entry into a purchase flow but NEVER licenses clicking its Yes/OK target.
+ * The underlying game's controls can retain `enabled=true` beneath the modal.
+ */
+export function isPurchaseConfirmationState(candidates, ancestry = []) {
+  return ancestry.some(edge => ['bonus_entry', 'bonus_option'].includes(edge.kind)) &&
+    candidates.some(candidate => candidate.kind === 'purchase_confirm');
+}
+
 export function routeAllowed(candidate, { demo = false, initiateDemoPurchase = false, ancestry = [] } = {}) {
   if (!candidate || !ACTIONABLE.has(candidate.kind)) return false;
   if (!demo) return false;
@@ -126,7 +145,7 @@ export function stateFingerprint(state) {
   const controls = (state.controls || []).filter(c => c.visible === true && c.stable === true)
     .map(c => [c.source, normalizeText(c.label || c.localId || '').replace(/\d+(?:[.,]\d+)?/g, '#'), c.enabled, c.localId?.split('/').slice(-2).join('/')]).sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
   const texts = (state.ocr?.lines || []).filter(c => c.confidence >= 65)
-    .map(c => normalizeText(c.text).replace(/\b\d+(?:[.,]\d+)?\b/g, '#')).filter(Boolean).sort().slice(0, 48);
+    .map(c => { const t = normalizeText(c.text); return /\b(bet|apuesta|ante bet|chance)\b/.test(t) ? t : t.replace(/\b\d+(?:[.,]\d+)?\b/g, '#'); }).filter(Boolean).sort().slice(0, 48);
   const content = JSON.stringify({ controls, texts });
   return createHash('sha256').update(content).digest('hex').slice(0, 24);
 }
