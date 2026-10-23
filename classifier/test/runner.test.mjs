@@ -35,7 +35,7 @@ async function setup(t, ids=['a'], targetUrl=url) {
 async function reference(observation) {
   const imagePath=join(temp,`${observation.sessionId}-${observation.imageSha256}.jpg`);
   await writeFile(imagePath,observation.image);
-  return {imagePath,sessionId:observation.sessionId,width:observation.width,height:observation.height,imageSha256:observation.imageSha256};
+  return {imagePath,sessionId:observation.sessionId,width:observation.width,height:observation.height,imageSha256:observation.imageSha256,coordinateTransform:observation.coordinateTransform};
 }
 function control(observation,label,mode='continue',gameId='a') {
   const candidate=observation.candidates.find(c=>c.label===label);
@@ -195,4 +195,60 @@ test('provider device profile sets the observation viewport and touch context',a
   const page=browser.contexts().at(-1).pages()[0];
   assert.equal(await page.evaluate(()=>navigator.maxTouchPoints),1);
   assert.equal(await page.evaluate(()=>devicePixelRatio),2.625);
+});
+
+test('no-meta Pixel 7 manual screenshot coordinates reach Continue and candidates match its image position',async t=>{
+  const runner=new BrowserRunner({browser,targets:[{id:'phone',url,device:'Pixel 7'}],initialWaitMs:5,settleMs:20,localFixture:true});
+  t.after(()=>runner.close());
+  const observation=await runner.open('phone'),page=browser.contexts().at(-1).pages()[0];
+  assert.equal(await page.locator('meta[name="viewport"]').count(),0);
+  assert.equal(observation.width,412);assert.equal(observation.state.viewport.width,981);
+  // Hand-checked screenshot position: CSS center (640,467.5), visual scale .42040816.
+  const point={x:.65306122,y:.23425604};
+  const result=await runner.perform('phone',{control:{id:'manual-phone-continue',gameId:'phone',screenId:'phone-screen',sessionId:observation.sessionId,mode:'continue',role:'continue',label:'Continuar',...point},reference:await reference(observation)});
+  assert.deepEqual(await page.evaluate(()=>inputs),['continue'],'the reviewed screenshot point reaches the real control');
+  assert.equal(await page.evaluate(()=>screenName),'base');
+  assert.equal(result.verification.dom.status,'matched');
+  const candidate=observation.candidates.find(candidate=>candidate.label==='Continuar');assert.ok(candidate);
+  assert.ok(Math.abs(candidate.x-point.x)<.002&&Math.abs(candidate.y-point.y)<.002);
+  assert.ok(observation.coordinateTransform.scale>0&&observation.coordinateTransform.scale<1);
+});
+
+test('supplied invalid or mismatched coordinate transforms reject before input',async t=>{
+  const {runner,observation,page}=await setup(t),ref=await reference(observation),mark=control(observation,'Continuar');
+  for(const coordinateTransform of [null,{}, {...observation.coordinateTransform,scale:0},{...observation.coordinateTransform,scale:NaN},{...observation.coordinateTransform,scale:Infinity},{...observation.coordinateTransform,scale:2},{...observation.coordinateTransform,offsetLeft:-1}]){
+    await assert.rejects(runner.perform('a',{control:mark,reference:{...ref,coordinateTransform}}),error=>error.inputMayHaveDispatched===false&&/transform/i.test(error.message));
+  }
+  assert.deepEqual(await page.evaluate(()=>inputs),[]);
+});
+
+test('actual visual viewport drift before fresh capture rejects without input',async t=>{
+  const {runner,observation,page}=await setup(t);
+  const cdp=await page.context().newCDPSession(page);
+  await cdp.send('Emulation.setPageScaleFactor',{pageScaleFactor:1.25});
+  await assert.rejects(perform(runner,observation,'Continuar'),error=>error.inputMayHaveDispatched===false&&/transform/i.test(error.message));
+  assert.deepEqual(await page.evaluate(()=>inputs),[]);
+  await cdp.detach();
+});
+
+test('visual viewport drift after image comparison still rejects immediately before dispatch',async t=>{
+  const {runner,observation,page}=await setup(t),cdp=await page.context().newCDPSession(page);
+  const evaluate=page.evaluate.bind(page);let changed=false;
+  page.evaluate=async(fn,arg)=>{const result=await evaluate(fn,arg);if(!changed&&arg?.before&&arg?.after&&arg?.point){changed=true;await cdp.send('Emulation.setPageScaleFactor',{pageScaleFactor:1.25});}return result;};
+  await assert.rejects(perform(runner,observation,'Continuar'),error=>error.inputMayHaveDispatched===false&&/transform/i.test(error.message));
+  assert.equal(changed,true,'real browser scale changed after the image comparison');
+  assert.deepEqual(await evaluate(()=>inputs),[]);
+  page.evaluate=evaluate;await cdp.detach();
+});
+
+test('an identical JPEG cannot replace the supplied reference coordinate transform',async t=>{
+  const {runner,page}=await setup(t);
+  await page.setContent('<style>body{margin:0;background:#173151;overflow:hidden}</style><script>window.inputs=[];document.addEventListener("click",()=>inputs.push("click"));</script>');
+  const original=await runner.observe('a'),ref=await reference(original);
+  const cdp=await page.context().newCDPSession(page);await cdp.send('Emulation.setPageScaleFactor',{pageScaleFactor:1.25});
+  const newer=await runner.observe('a');
+  assert.equal(newer.imageSha256,original.imageSha256,'uniform pixels are byte-identical across distinct coordinate transforms');
+  assert.notEqual(newer.coordinateTransform.scale,original.coordinateTransform.scale);
+  await assert.rejects(runner.perform('a',{control:{id:'same-jpeg-control',gameId:'a',sessionId:original.sessionId,mode:'continue',x:.5,y:.5},reference:ref}),error=>error.inputMayHaveDispatched===false&&/transform/i.test(error.message));
+  assert.deepEqual(await page.evaluate(()=>inputs),[]);await cdp.detach();
 });

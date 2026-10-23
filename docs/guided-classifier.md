@@ -25,6 +25,8 @@ Si una activación de Antebet muestra una pantalla intermedia, mueve el Spin o i
 
 Cada marca contiene juego, sesión, rol, etiqueta, coordenadas normalizadas de 0 a 1 y captura de origen. Cada captura tiene tamaño, revisión, SHA-256, imagen inmutable, pantalla padre y control que produjo la transición. Cada acción conserva la intención anterior al clic, el estado del envío, la captura siguiente y metadatos de red sin consultas, credenciales ni cuerpos de solicitudes.
 
+En dispositivos móviles también se conserva la escala y el desplazamiento del viewport visual. El navegador convierte el punto marcado en la imagen a las coordenadas reales de la página y comprueba que esa transformación no haya cambiado antes del clic.
+
 **Exportar grafo** descarga JSON con todas las marcas y rutas. Los pasos incluyen `controlId`, rol, coordenadas, revisión y hash de imagen, además de la exigencia de revalidar antes de ejecutarlos. El compuesto Antebet contiene el activador seguido de su Spin vinculado.
 
 Un clic enviado no demuestra que el proveedor haya completado una tirada o una compra. La interfaz conserva esa diferencia. Si se pierde la respuesta o se interrumpe el proceso después de guardar la intención, el envío queda desconocido y la ruta se exporta con `needs_review` y `replayAllowed: false`. Una captura nueva puede permitir seguir clasificando; no borra la incertidumbre de la acción anterior.
@@ -40,6 +42,8 @@ El servidor y Chromium permanecen en el runner durante la sesión. Un túnel tem
 Los guardados se publican en la rama independiente **classifier-data**, bajo `guided-20261023/`, mediante el token del propio workflow. Antes de enviar input debe quedar publicada su intención. Tras cada operación se publica el resultado y su imagen. Si falla esa publicación se informa el fallo. Los archivos guardados sobreviven al runner; la memoria del navegador termina con él.
 
 La duración configurada es **180 minutos**, contados desde que el túnel responde. Para cerrar antes, cancelá la ejecución en Actions. Una nueva ejecución obtiene otra URL, restaura los datos y abre sesiones de navegador nuevas. Conserva las capturas y marcas anteriores, pero no reproduce automáticamente compras, giros ni rutas. Los juegos ya finalizados conservan su estado. No ejecutes dos escritores para el mismo identificador de sesión fuera de la exclusión del workflow.
+
+Por defecto, otra ejecución espera a que termine la actual. Para reemplazarla de forma explícita, activá **restart** al ejecutar el workflow manualmente. Un commit de implementación con `[restart-classifier]` en el mensaje también solicita ese reemplazo; conserva los datos guardados y abre una sesión de navegador nueva.
 
 ## Reproducir en una PC
 

@@ -2,6 +2,11 @@ name: Guided classifier session
 
 on:
   workflow_dispatch:
+    inputs:
+      restart:
+        description: Replace the current browser session with a fresh runner
+        type: boolean
+        default: false
   push:
     branches: [main]
     paths:
@@ -24,7 +29,7 @@ defaults:
 
 concurrency:
   group: hail-marry-classifier-session
-  cancel-in-progress: false
+  cancel-in-progress: ${{ (github.event_name == 'workflow_dispatch' && inputs.restart) || (github.event_name == 'push' && contains(github.event.head_commit.message, '[restart-classifier]')) }}
 
 jobs:
   classifier:

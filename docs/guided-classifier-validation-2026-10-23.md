@@ -1,0 +1,44 @@
+# Validación del clasificador guiado — 23 de octubre de 2026
+
+Primera versión publicada: [`6399a0b`](https://github.com/Shisetsu-Code/Hail-Marry/commit/6399a0b3ad3f93190adcbd8c7afa32bf1488e45f). Primera ejecución: [Guided classifier session 40039101204](https://github.com/Shisetsu-Code/Hail-Marry/actions/runs/40039101204).
+
+## Evidencia comprobada
+
+- **114 pruebas locales aprobadas**, sin fallos ni omisiones, contra el árbol exacto publicado. Incluyen 55 pruebas existentes y 59 del clasificador.
+- El paso completo de pruebas también terminó correctamente en GitHub, con Node 22 y Chromium instalado en el runner.
+- Integración con interfaz real, servidor autenticado, almacén y Chromium: **14 inputs de fixture y 15 rutas**. Se verificaron Q, 1–5, Antebet con Spin guardado antes de actualizar, menús anidados, opciones, vuelta, cancelación, compra y confirmación.
+- El proceso CLI real inició dos juegos de fixture, sirvió imágenes cuyos SHA-256 coincidían, rechazó accesos sin clave y terminó por SIGTERM con sus 13 procesos de navegador/servidor cerrados.
+- Revisión independiente completada. Se corrigieron incertidumbre de envío, fallos de escritura después de un clic, recuperación de la ascendencia de rutas, controles de capturas finalizadas y la elegibilidad de una compra incierta tras reiniciar.
+- El intento de crear un árbol vacío mediante GitHub devolvió HTTP 422. La inicialización se corrigió para crear un README en un commit sin padres y se probó esa restricción. La publicación real creó posteriormente `classifier-data`.
+
+## Sesión iniciada
+
+El servidor y el túnel temporal arrancaron en GitHub. El propio runner comprobó HTTP satisfactorio en la URL pública antes de publicar el artefacto **classifier-connection**. La sesión empezó a las **23:21:41 UTC** y tiene vencimiento a las **02:21:41 UTC del 24 de octubre**. El workflow permanece en ejecución para mantenerla disponible; su paso de espera no representa un fallo.
+
+La clave de acceso se entrega por separado. El repositorio y los artefactos públicos sólo contienen su hash o metadatos de conexión.
+
+## Capturas reales guardadas
+
+Las tres imágenes fueron descargadas desde la rama de datos y verificadas contra el SHA-256 registrado. No se enviaron inputs a esas demos durante esta comprobación.
+
+| Juego | Resultado visual de la captura inicial | Tamaño |
+| --- | --- | --- |
+| Pragmatic — 3 Dancing Monkeys | Pantalla de juego, Spin y Buy Free Spins visibles. | 1280 × 720 |
+| BGaming — Three Lucky Monkeys Hold & Win | Introducción con «Click anywhere to start», utilizable para enseñar Q. | 1280 × 720 |
+| Play’n GO — Amulet of Dead móvil | Pantalla mayormente negra con logotipo y sonido. No se acreditó que el juego estuviera listo para clasificar. | 412 × 839 |
+
+Estado y evidencia: [classifier-data/guided-20261023](https://github.com/Shisetsu-Code/Hail-Marry/tree/classifier-data/guided-20261023).
+
+## Límites de esta validación
+
+El acceso directo al túnel desde el entorno de desarrollo devolvió **HTTP 403** antes de llegar a las API; la ruta directa sin proxy falló por DNS. Por eso no se afirma que se haya completado una comprobación autenticada del enlace público desde ese entorno. La interfaz autenticada sí quedó probada íntegramente contra el servidor local real y el túnel respondió al comprobador ejecutado en GitHub.
+
+La revisión de capturas acredita dos pantallas útiles y una pantalla móvil pendiente. No acredita que todas las opciones de todos los proveedores hayan sido exploradas. El exportado conserva las rutas enseñadas y sus incertidumbres; un barrido autónomo exhaustivo posterior sigue fuera de esta entrega.
+
+## Corrección de coordenadas móviles y nueva verificación
+
+La captura móvil permitió detectar una diferencia real entre las coordenadas de la imagen y las del viewport de la página. Se reprodujo con Chromium emulando Pixel 7 en una página sin meta viewport: el punto visible de Continue debía transformarse antes de enviar el clic. El runner ahora guarda escala, desplazamientos y dimensiones, transforma las marcas y candidatos en el sentido correspondiente y rechaza cambios de viewport antes de enviar input.
+
+La verificación final local de esta corrección aprobó **120 pruebas, cero fallos, cero omisiones**, en 37,71 segundos. Incluye 55 pruebas existentes y 65 del clasificador. Las regresiones cubren el input real en Continue móvil, transformaciones inválidas, cambios de zoom durante la validación y capturas con el mismo JPEG pero distinta transformación. La revisión independiente no encontró bloqueos.
+
+La sustitución de la primera sesión se solicita de forma explícita mediante `[restart-classifier]`. La sesión inicial todavía no contiene marcas ni acciones del usuario. El reinicio conserva su evidencia y crea sesiones nuevas de navegador; no reproduce inputs.

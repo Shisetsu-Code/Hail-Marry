@@ -43,7 +43,9 @@ Interfaces: REST API and runner contract in spec.
 - [x] Implement atomic store and authenticated same-origin API with per-game mutation locking.
 - [x] Integrate runner, frontend, immutable JPEGs, repository data checkpointing.
 - [x] Run baseline/new test suites and real UI fixture flow; independently review complete changes.
-- [ ] Publish to Hail-Marry, start workflow, verify authenticated live UI and loaded demo captures, report operational URL and limits.
+- [x] Publish to Hail-Marry, start workflow and verify saved demo captures: two usable screens and one mobile screen pending.
+- [x] Verify authenticated UI against the real local server/browser and check public tunnel health from the GitHub runner.
+- [ ] Deliver the replacement session URL and its expiration; report that this development environment's HTTP 403 prevents an authenticated external tunnel check.
 
 ## Decisions
 

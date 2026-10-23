@@ -105,6 +105,10 @@ export class GuidedStore {
     const game=this._game(id);
     if(!Buffer.isBuffer(observation.image)||observation.image.length===0||observation.image.length>12*1024*1024) throw new ClassifierError('Captura inválida');
     if(!observation.sessionId || !Number.isInteger(observation.width)||!Number.isInteger(observation.height)||observation.width<1||observation.height<1) throw new ClassifierError('Identidad o tamaño de captura inválido');
+    const coordinateTransform=observation.coordinateTransform||{scale:1,offsetLeft:0,offsetTop:0,
+      visualWidth:observation.width,visualHeight:observation.height,layoutWidth:observation.width,layoutHeight:observation.height};
+    if(['scale','visualWidth','visualHeight','layoutWidth','layoutHeight'].some(key=>!Number.isFinite(coordinateTransform[key])||coordinateTransform[key]<=0)||
+      ['offsetLeft','offsetTop'].some(key=>!Number.isFinite(coordinateTransform[key])||coordinateTransform[key]<0)) throw new ClassifierError('Transformación de coordenadas inválida');
     const imageSha256=hash(observation.image);
     if(observation.imageSha256 && observation.imageSha256!==imageSha256) throw new ClassifierError('El hash de la captura no coincide');
     if(parentScreenId && !game.screens.some(s=>s.id===parentScreenId)) throw new ClassifierError('Pantalla padre ajena al juego');
@@ -113,7 +117,7 @@ export class GuidedStore {
     const filename=`${id}-${revision}-${imageSha256.slice(0,20)}.jpg`;
     await writeFile(path.join(this.directory,'images',filename),observation.image,{flag:'wx',mode:0o600});
     const screen={id:screenId,gameId:id,sessionId:observation.sessionId,revision,imageSha256,
-      imageUrl:'/api/images/'+filename,width:observation.width,height:observation.height,
+      imageUrl:'/api/images/'+filename,width:observation.width,height:observation.height,coordinateTransform:clone(coordinateTransform),
       createdAt:observation.at||now(),parentScreenId,viaControlId,route:[...route],
       routeVerified:!uncertainTransition && game.screens.find(s=>s.id===parentScreenId)?.routeVerified!==false,
       ...(uncertainTransition?{uncertainTransition:clone(uncertainTransition)}:{}),
@@ -122,7 +126,7 @@ export class GuidedStore {
     await this.save(); return clone(screen);
   }
   imagePath(screen) { return path.join(this.directory,'images',path.basename(screen.imageUrl)); }
-  reference(screen) { return {imagePath:this.imagePath(screen),imageSha256:screen.imageSha256,sessionId:screen.sessionId,width:screen.width,height:screen.height}; }
+  reference(screen) { return {imagePath:this.imagePath(screen),imageSha256:screen.imageSha256,sessionId:screen.sessionId,width:screen.width,height:screen.height,coordinateTransform:clone(screen.coordinateTransform)}; }
   async addControl(id,input) {
     const game=this._game(id), screen=this.assertCurrent(id,input), mode=input.mode;
     if(game.finished) throw new ClassifierError('Esta captura ya está finalizada',409);
@@ -202,7 +206,7 @@ export class GuidedStore {
         replayAllowed:!needsReview,...(unresolved.length?{unresolvedActionIds:unresolved.map(action=>action.id)}:{}),
         steps:controlIds.map(controlId=>{
           const c=game.controls.find(value=>value.id===controlId), s=game.screens.find(value=>value.id===c?.screenId);
-          return {controlId,role:c?.role,x:c?.x,y:c?.y,screenId:c?.screenId,revision:s?.revision,imageSha256:s?.imageSha256,
+          return {controlId,role:c?.role,x:c?.x,y:c?.y,screenId:c?.screenId,revision:s?.revision,imageSha256:s?.imageSha256,coordinateTransform:s?.coordinateTransform||null,
             requiresFreshValidation:true,...(['buy','confirm','antebet','spin'].includes(c?.role)?{neverReplayAfterUncertainResult:true}:{})};
         })});
     }

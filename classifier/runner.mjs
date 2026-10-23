@@ -12,6 +12,17 @@ const MODES = new Set(['spin', 'antebet', 'menu', 'buy', 'continue', 'option', '
 const digest = image => createHash('sha256').update(image).digest('hex');
 const contains = (bounds, point) => bounds && point.x >= bounds.x && point.y >= bounds.y && point.x < bounds.x + bounds.width && point.y < bounds.y + bounds.height;
 const jpeg = image => image.length >= 4 && image[0] === 255 && image[1] === 216 && image.at(-2) === 255 && image.at(-1) === 217;
+const TRANSFORM_FIELDS = ['scale', 'offsetLeft', 'offsetTop', 'visualWidth', 'visualHeight', 'layoutWidth', 'layoutHeight'];
+function validTransform(value) {
+  if (!value || typeof value !== 'object' || TRANSFORM_FIELDS.some(field => !Number.isFinite(value[field])) ||
+      ['scale', 'visualWidth', 'visualHeight', 'layoutWidth', 'layoutHeight'].some(field => value[field] <= 0) || value.offsetLeft < 0 || value.offsetTop < 0)
+    throw new Error('Invalid screenshot coordinate transform');
+  return value;
+}
+function sameTransform(expected, current) {
+  validTransform(expected); validTransform(current);
+  if (TRANSFORM_FIELDS.some(field => expected[field] !== current[field])) throw new Error('Screenshot coordinate transform changed; capture a fresh reference');
+}
 
 /** One explicitly reviewed input per call. Composite operations belong to the graph/store. */
 export class BrowserRunner {
@@ -67,18 +78,38 @@ export class BrowserRunner {
     });
   }
   observe(gameId) { return this.#serial(gameId, () => this.#observe(this.#session(gameId))); }
+  async #coordinateTransform(page) {
+    return validTransform(await page.evaluate(() => {
+      const visual = window.visualViewport;
+      if (!visual) return null;
+      return { scale: visual.scale, offsetLeft: visual.offsetLeft, offsetTop: visual.offsetTop,
+        visualWidth: visual.width, visualHeight: visual.height, layoutWidth: innerWidth, layoutHeight: innerHeight };
+    }));
+  }
   async #observe(session) {
     if (new URL(session.page.url()).origin !== session.origin) throw new Error('Demo origin changed');
+    const initialTransform = await this.#coordinateTransform(session.page);
     const state = await session.detector.observe(session.page);
     const viewport = session.page.viewportSize();
+    const coordinateTransform = await this.#coordinateTransform(session.page);
+    sameTransform(initialTransform, coordinateTransform);
+    if (state.viewport.width !== coordinateTransform.layoutWidth || state.viewport.height !== coordinateTransform.layoutHeight)
+      throw new Error('Detector coordinate transform changed during observation');
     const image = await session.page.screenshot({ type: 'jpeg', quality: 85, fullPage: false, scale: 'css', timeout: 15000 });
-    const observation = { image, imageSha256: digest(image), width: viewport.width, height: viewport.height, sessionId: session.sessionId, at: new Date().toISOString(), candidates: [], state };
+    sameTransform(coordinateTransform, await this.#coordinateTransform(session.page));
+    const afterViewport = session.page.viewportSize();
+    if (viewport.width !== afterViewport.width || viewport.height !== afterViewport.height) throw new Error('Screenshot viewport changed during capture');
+    const observation = { image, imageSha256: digest(image), width: viewport.width, height: viewport.height, coordinateTransform: { ...coordinateTransform }, sessionId: session.sessionId, at: new Date().toISOString(), candidates: [], state };
+    const imagePoint = point => ({ x: (point.x-coordinateTransform.offsetLeft)*coordinateTransform.scale, y: (point.y-coordinateTransform.offsetTop)*coordinateTransform.scale });
     observation.candidates = state.controls.filter(c => c.visible && c.bounds && c.geometryReliable).map(c => {
-      const p = c.hitPoint || { x: c.bounds.x + c.bounds.width / 2, y: c.bounds.y + c.bounds.height / 2 };
+      const p = imagePoint(c.hitPoint || { x: c.bounds.x + c.bounds.width / 2, y: c.bounds.y + c.bounds.height / 2 });
+      const origin = imagePoint(c.bounds), x = Math.max(0, origin.x), y = Math.max(0, origin.y);
+      const width = Math.max(0, Math.min(viewport.width, origin.x+c.bounds.width*coordinateTransform.scale)-x);
+      const height = Math.max(0, Math.min(viewport.height, origin.y+c.bounds.height*coordinateTransform.scale)-y);
       return { id: c.id, label: c.label, source: c.source, role: c.role, availability: c.availability, x: p.x / viewport.width, y: p.y / viewport.height,
-        bounds: { x: c.bounds.x / viewport.width, y: c.bounds.y / viewport.height, width: c.bounds.width / viewport.width, height: c.bounds.height / viewport.height } };
-    }).filter(c => c.x >= 0 && c.x < 1 && c.y >= 0 && c.y < 1);
-    session.references.set(observation.imageSha256, { width: observation.width, height: observation.height, state, epoch: session.epoch });
+        bounds: { x: x / viewport.width, y: y / viewport.height, width: width / viewport.width, height: height / viewport.height } };
+    }).filter(c => c.x >= 0 && c.x < 1 && c.y >= 0 && c.y < 1 && c.bounds.width > 0 && c.bounds.height > 0);
+    session.references.set(observation.imageSha256, { width: observation.width, height: observation.height, coordinateTransform: { ...coordinateTransform }, state, epoch: session.epoch });
     return observation;
   }
   async #domCheck(session, expected, fresh, point) {
@@ -148,14 +179,23 @@ export class BrowserRunner {
       const expected = session.references.get(hash);
       if (!expected) throw new Error('Reference image was not observed in this game session');
       if (expected.width !== viewport.width || expected.height !== viewport.height) throw new Error('Observed viewport changed');
+      validTransform(expected.coordinateTransform);
+      if (reference.coordinateTransform !== undefined) sameTransform(expected.coordinateTransform, reference.coordinateTransform);
+      sameTransform(expected.coordinateTransform, await this.#coordinateTransform(session.page));
       if (scope === 'scene' && expected.epoch !== session.epoch) throw new Error('Stale reference predates a dispatched input; review the current scene');
       if (scope === 'target' && (control.mode !== 'spin' || !control.linkedAnteControlId || session.lastAction?.mode !== 'antebet' || session.lastAction.controlId !== control.linkedAnteControlId || expected.epoch > session.lastAction.sourceEpoch || session.epoch !== session.lastAction.sourceEpoch + 1)) throw new Error('Target scope requires the explicitly linked Spin immediately after its antebet');
       const before = await this.#observe(session), point = { x: control.x, y: control.y };
-      const dom = await this.#domCheck(session, expected, before, { x: point.x*viewport.width, y: point.y*viewport.height });
+      sameTransform(expected.coordinateTransform, before.coordinateTransform);
+      const transform = expected.coordinateTransform;
+      const layoutPoint = { x: point.x*viewport.width/transform.scale+transform.offsetLeft, y: point.y*viewport.height/transform.scale+transform.offsetTop };
+      if (!Number.isFinite(layoutPoint.x) || !Number.isFinite(layoutPoint.y)) throw new Error('Invalid transformed input coordinates');
+      const dom = await this.#domCheck(session, expected, before, layoutPoint);
       const visual = scope === 'scene' ? await matchReviewedImage(session.page,image,before.image,point) : await this.#targetMatch(session.page,image,before.image,point);
       if (!visual.matched) throw new Error('Reviewed screen or target changed: '+visual.reason);
       // Recheck pointer receipt after visual decoding, immediately before actual input.
-      await this.#domCheck(session, expected, before, { x: point.x*viewport.width, y: point.y*viewport.height });
+      sameTransform(expected.coordinateTransform, await this.#coordinateTransform(session.page));
+      await this.#domCheck(session, expected, before, layoutPoint);
+      sameTransform(expected.coordinateTransform, await this.#coordinateTransform(session.page));
       const network = [], requests = new Map();
       const onRequest = request => {
         if (!['fetch','xhr','document'].includes(request.resourceType()) || network.length >= 100) return;
@@ -171,7 +211,7 @@ export class BrowserRunner {
         // Invalidate prior references before dispatch, including the uncertain failure path.
         const sourceEpoch = session.epoch++;
         session.lastAction = null;
-        try { await session.page.mouse.click(point.x*viewport.width,point.y*viewport.height); }
+        try { await session.page.mouse.click(layoutPoint.x,layoutPoint.y); }
         catch (error) {
           return { before, after: null, inputDispatched: null, uncertainDispatch: true,
             confirmation: { status: 'pending', reason: 'Click dispatch acknowledgement unavailable; input may have occurred: '+error.message },

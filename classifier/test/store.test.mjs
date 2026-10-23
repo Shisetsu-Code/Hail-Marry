@@ -122,3 +122,13 @@ test('restart turns an interrupted published intent into unknown dispatch and bl
   const current=await restored.addControl('one',{...ref(fresh),mode:'continue',x:.5,y:.5});
   assert.equal(restored.export().routes.find(route=>route.controlId===current.id).replayAllowed,true);
 });
+test('screenshot coordinate transforms survive capture, reference and route export',async t=>{
+  const {store}=await setup(t);
+  const next=observation('session-one','scaled-mobile-image');
+  next.coordinateTransform={scale:.42040816,offsetLeft:3,offsetTop:7,visualWidth:980,visualHeight:1996,layoutWidth:981,layoutHeight:1996};
+  const screen=await store.capture('one',next);
+  const control=await store.addControl('one',{...ref(screen),mode:'continue',x:.65,y:.23});
+  assert.deepEqual(store.reference(screen).coordinateTransform,next.coordinateTransform);
+  assert.deepEqual(store.export().routes.find(route=>route.controlId===control.id).steps[0].coordinateTransform,next.coordinateTransform);
+  await assert.rejects(store.capture('one',{...next,coordinateTransform:{...next.coordinateTransform,scale:0}}),/coordenadas|transformación/);
+});
