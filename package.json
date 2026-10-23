@@ -3,13 +3,15 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Dynamic game-control observation with delayed sampling, OCR and local Laya decisions",
+  "description": "Dynamic game-control observation, bounded BFS navigation, OCR and optional GPT review",
   "engines": { "node": ">=22" },
   "scripts": {
     "test": "node --test --test-concurrency=2 tests/*.test.mjs",
     "probe": "node src/cli.mjs",
     "test:integration": "node scripts/integration.mjs",
-    "test:laya": "node scripts/laya-smoke.mjs"
+    "test:laya": "node scripts/laya-smoke.mjs",
+    "test:bfs": "node scripts/bfs-integration.mjs",
+    "bfs:live": "node src/bfs-cli.mjs"
   },
   "dependencies": { "playwright": "1.64.1" }
 }

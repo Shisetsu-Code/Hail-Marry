@@ -75,3 +75,7 @@ La configuración distribuida únicamente avanza introducciones explícitas. La 
 Esta pila necesita un proceso con navegador y Python. Windows/GPU y otras clases de workers se evalúan después; un Cloudflare Worker aislado no ejecuta esta pila local.
 
 Ver [diseño](docs/experiment.md) y [versiones y API de Laya](docs/laya-runtime.md).
+
+## Exploración BFS de menús y opciones de compra FUN
+
+Nuevo modo de búsqueda en anchura: `npm run bfs:live`. Descubre Buy Bonus, opciones de free spins, Bet +/- y Ante Bet; guarda rutas, capturas y textos nuevos en una cola GPT. Revalida cada acción, vuelve a cargar sesiones demo aisladas al recorrer ramas, nunca pulsa Spin ni confirma compras finales. El modo sin `OPENAI_API_KEY` solo guarda la clasificación pendiente; el modo con API puede solicitar clasificaciones GPT estructuradas y verificadas. [Diseño y reproducción](docs/bfs-navigation.md). La automatización está limitada a FUN/practice/demos; aún requiere validación real antes del port a un worker.

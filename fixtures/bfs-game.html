@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BFS navigation test — simulated demo only</title>
+<style>
+  *{box-sizing:border-box}body{background:#101626;color:#f4f4f4;font:18px Arial,sans-serif;margin:0}
+  main{width:1000px;height:650px;margin:10px auto;position:relative;border:2px solid #637ca2;background:#223657;overflow:hidden}
+  h1{text-align:center;font-size:35px;margin:55px 0 25px}button{padding:16px 22px;background:#294b73;color:#fff;border:2px solid #9caac1;border-radius:12px;font-size:22px;font-weight:700;cursor:pointer;min-height:60px}
+  [hidden]{display:none!important}.bar{display:flex;gap:16px;justify-content:center;align-items:center;margin:12px auto;flex-wrap:wrap;width:920px}
+  #intro{position:absolute;inset:0;background:#102d47;display:grid;place-items:center;z-index:15}#intro button{background:#e8c77c;color:#1c2636}
+  #panel{position:absolute;z-index:10;left:170px;top:145px;width:660px;min-height:380px;background:#102c41;border:3px solid #c4b58c;border-radius:14px;padding:30px}
+  #panel h2{font-size:28px;text-align:center;margin:8px 0 28px}.options{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+  .bottom{position:absolute;bottom:15px;width:100%;text-align:center;font-size:18px;color:#b5d1e6}
+</style></head><body>
+<main>
+  <h1>DEMO NAVIGATION LAB</h1>
+  <div id="intro"><button id="continue">CLICK TO CONTINUE</button></div>
+  <div id="base" hidden>
+    <div class="bar">
+      <button id="buy-bonus">Buy Bonus</button>
+      <button id="menu">Menu</button>
+      <button id="ante">Ante Bet OFF</button>
+      <button id="bet-plus">Bet +</button>
+      <button id="bet-minus">Bet -</button>
+      <button id="spin">SPIN</button>
+    </div>
+    <div id="bet-display" style="text-align:center;font-size:25px;margin:55px">Bet level 1</div>
+  </div>
+  <section id="panel" hidden aria-label="Game options"><h2 id="heading">Features</h2><div id="options" class="options"></div></section>
+  <div class="bottom">FUN DEMO • NO MONEY OR CREDITS EVER CHARGED</div>
+</main>
+<script>
+(() => {
+const state={phase:'intro',ante:false,bet:1,menus:0,buysOpened:0,optionsSelected:[],confirmations:0,spinCount:0,actions:[]};
+const by=id=>document.getElementById(id);
+function record(action){state.actions.push(action)}
+function panel(title,buttons){state.phase=title; by('heading').textContent=title; by('options').replaceChildren();
+ for(const [label,callback] of buttons){const b=document.createElement('button');b.type='button';b.textContent=label;b.onclick=callback;by('options').append(b)}
+ by('panel').hidden=false;}
+function close(){record('close');by('panel').hidden=true;state.phase='base';}
+function options(){state.buysOpened++;record('buy-menu');panel('Buy Bonus options',[
+ ['Free Spins 50 FUN',()=>select('Free Spins 50 FUN')],
+ ['Super Bonus 100 FUN',()=>select('Super Bonus 100 FUN')],
+ ['Close',close]]);}
+function select(label){state.optionsSelected.push(label);record('initiate:'+label);panel('Purchase confirmation',[['Confirm purchase',()=>{state.confirmations++;record('confirm');}],['Cancel',close]])}
+by('continue').onclick=()=>{record('continue');state.phase='base';by('intro').hidden=true;by('base').hidden=false};
+by('menu').onclick=()=>{state.menus++;record('menu');setTimeout(()=>panel('Settings',[
+ ['Features',()=>{record('features');panel('Features',[['Bonus Buy',options],['Close',close]])}],['Close',close]]),170)};
+by('buy-bonus').onclick=options;
+by('ante').onclick=()=>{state.ante=!state.ante;by('ante').textContent=`Ante Bet ${state.ante?'ON':'OFF'}`;record('ante:'+state.ante)};
+by('bet-plus').onclick=()=>{state.bet++;by('bet-display').textContent='Bet level '+state.bet;record('bet+')};
+by('bet-minus').onclick=()=>{state.bet=Math.max(1,state.bet-1);by('bet-display').textContent='Bet level '+state.bet;record('bet-')};
+by('spin').onclick=()=>{state.spinCount++;record('spin')};
+Object.defineProperty(window,'__bfsFixture',{value:{snapshot:()=>({...state,actions:[...state.actions],optionsSelected:[...state.optionsSelected]})}});
+})();
+</script></body></html>

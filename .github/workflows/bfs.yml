@@ -1,0 +1,80 @@
+name: BFS navigation / demo-only
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/bfs-*.mjs'
+      - 'src/navigation-policy.mjs'
+      - 'src/gpt-review.mjs'
+      - 'scripts/bfs-integration.mjs'
+      - 'fixtures/bfs-game.html'
+      - 'tests/bfs-policy.test.mjs'
+      - '.github/workflows/bfs.yml'
+      - 'package.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: hail-marry-bfs-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bfs:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      OMP_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+          cache-dependency-path: requirements-ocr.txt
+      - name: Install Node, browser and OCR
+        timeout-minutes: 8
+        run: |
+          mkdir -p artifacts
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          import re
+          files = [Path('/etc/apt/sources.list'), Path('/etc/apt/apt-mirrors.txt'), *Path('/etc/apt/sources.list.d').glob('*.list'), *Path('/etc/apt/sources.list.d').glob('*.sources')]
+          for source in files:
+              if not source.is_file(): continue
+              old = source.read_text()
+              new = re.sub(r'https?://azure\.archive\.ubuntu\.com(?=/|\s|$)', 'https://archive.ubuntu.com', old)
+              if new != old: source.write_text(new)
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund
+          sudo apt-get update -qq
+          sudo apt-get install -y tesseract-ocr tesseract-ocr-eng
+          python -m pip install --disable-pip-version-check --only-binary=:all: -r requirements-ocr.txt
+          npx playwright install-deps chromium
+          { timeout 90s npx playwright install chromium || timeout 90s python scripts/install-browser-fallback.py; }
+      - name: Test all deterministic navigation rules
+        run: npm test 2>&1 | tee artifacts/bfs-unit.log
+      - name: Test full BFS on simulated menus / bonus selection
+        run: npm run test:bfs 2>&1 | tee artifacts/bfs-fixture.log
+      - name: Explore three public FUN demos in parallel
+        # This job can be run without any GPT key: unknown screens go to a review queue.
+        run: |
+          npm run bfs:live -- --config config/demos.json --games-concurrency 3 --branch-concurrency 2 --max-depth 2 --max-nodes 9 --max-per-node 6 --initiate-demo-purchase true --gpt false 2>&1 | tee artifacts/bfs-live.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bfs-navigation-evidence
+          path: artifacts/
+          retention-days: 14
+          if-no-files-found: warn
