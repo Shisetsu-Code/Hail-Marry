@@ -1,0 +1,38 @@
+name: CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node: ['22', '24']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+      - run: npm install --ignore-scripts
+      - run: npm run check
+      - name: Check every JavaScript module
+        run: find src local mcp scripts -type f \( -name '*.js' -o -name '*.mjs' \) -exec node --check {} \;
+      - run: npm test
+      - name: Install Chromium for action-path integration test
+        if: matrix.node == '22'
+        run: npx playwright install --with-deps chromium
+      - name: "Browser fixture: reviewed click to sanitized protocol request"
+        if: matrix.node == '22'
+        env:
+          INTEGRATION_BROWSER: '1'
+        run: node --test test/browser-fixture.test.js
+
+  windows-bootstrap:
+    name: Windows collector first-run bootstrap
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test test/collector-control.test.js test/collector-setup.test.js test/auto-update.test.js

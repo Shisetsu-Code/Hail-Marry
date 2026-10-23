@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <title>Hail Marry · Captura guiada</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand"><span class="brand-symbol">H</span><div><strong>HAIL MARRY</strong><span>Captura guiada</span></div></div>
+    <div class="run-info"><span class="live-dot" id="connection-dot"></span><span id="connection">Conectando…</span><span class="divider"></span><span id="progress">—</span></div>
+    <button id="export" class="quiet" disabled>Exportar grafo ↗</button>
+  </header>
+  <section id="auth-panel" class="auth-panel" hidden>
+    <form id="auth-form"><span class="eyebrow">ACCESO PRIVADO</span><h1>Abre tu sesión de captura</h1><p>Introduce la clave de acceso de esta ejecución.</p><label for="access-key">Clave de acceso</label><input id="access-key" type="password" autocomplete="off" required><button type="submit" class="primary">Conectar</button><p id="auth-error" role="alert"></p></form>
+  </section>
+  <main id="workspace" class="workspace" hidden>
+    <aside class="queue-panel">
+      <div class="panel-heading"><span class="eyebrow">COLA DE JUEGOS</span><span id="game-count" class="count">0</span></div>
+      <div id="game-list" class="game-list" aria-label="Juegos"></div>
+      <div class="queue-footer"><span class="tiny-dot"></span> Los juegos cargan por separado</div>
+    </aside>
+    <section class="capture-panel">
+      <div class="capture-heading"><div><span id="provider" class="eyebrow">—</span><h1 id="game-title">Selecciona un juego</h1></div><div class="capture-actions"><button id="refresh" class="quiet" disabled>↻ Actualizar</button><button id="finish" class="primary" disabled>Finalizar y siguiente →</button></div></div>
+      <div class="modebar" aria-label="Modos de captura">
+        <button data-mode="spin"><kbd>1</kbd><span>Spin<small>Solo guardar</small></span></button>
+        <button data-mode="antebet"><kbd>2</kbd><span>Antebet<small>Activar + Spin</small></span></button>
+        <button data-mode="menu"><kbd>3</kbd><span>Menú<small>Abrir compras</small></span></button>
+        <button data-mode="buy"><kbd>4</kbd><span>Compra<small>Compra directa</small></span></button>
+        <button data-mode="spin_only"><kbd>5</kbd><span>Solo Spin<small>Guardar y finalizar</small></span></button>
+        <button data-mode="continue"><kbd>Q</kbd><span>Continuar<small>Avanzar pantalla</small></span></button>
+      </div>
+      <div class="capture-options"><div class="role-options" aria-label="Otros controles"><span>Otros:</span><button data-mode="option">Opción</button><button data-mode="confirm">Confirmar</button><button data-mode="cancel">Cancelar</button><button data-mode="back">Volver</button><button data-mode="bet">Apuesta</button></div><label class="toggle"><input id="mark-only" type="checkbox"> Solo marcar</label></div>
+      <div class="instruction"><span id="mode-indicator" class="mode-indicator">1</span><span id="instruction">Selecciona Spin y haz clic en el control.</span><span id="screen-meta"></span></div>
+      <div id="stage" class="stage" aria-label="Captura del juego"><div id="stage-message" class="stage-message">Esperando una captura…</div><div id="image-wrap" class="image-wrap" hidden><img id="screenshot" alt="Captura actual del juego. Haz clic para marcar el control seleccionado." draggable="false"><div id="markers" class="markers" aria-hidden="true"></div></div></div>
+      <div class="capture-footer"><span id="route">Pantalla inicial</span><span id="save-state" role="status" aria-live="polite">Listo</span></div>
+      <div id="notice" class="notice" role="status" aria-live="polite" hidden></div>
+    </section>
+    <aside class="detail-panel">
+      <div class="panel-heading"><span class="eyebrow">RUTA Y CONTROLES</span><span id="control-count" class="count">0</span></div>
+      <label class="field-label" for="mark-label">Nombre del próximo control <span>opcional</span></label><input id="mark-label" placeholder="Ej. Compra de giros gratis" maxlength="160">
+      <div id="controls" class="controls"><p class="empty">Los controles marcados aparecerán aquí.</p></div>
+      <div class="history-section"><label class="field-label" for="history">Capturas guardadas</label><select id="history" aria-label="Capturas guardadas"><option value="">Pantalla actual</option></select><p id="history-note" class="muted">Puedes revisar las rutas anteriores.</p></div>
+      <details class="action-history" open><summary>Historial de acciones <span id="action-count">0</span></summary><div id="actions" class="actions"></div></details>
+    </aside>
+  </main>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>

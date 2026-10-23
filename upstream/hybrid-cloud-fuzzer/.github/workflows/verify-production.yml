@@ -1,0 +1,34 @@
+name: Verify Cloudflare production
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/verify-production.yml'
+      - 'src/**'
+      - 'migrations/**'
+      - 'wrangler.toml'
+      - 'package.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  worker-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Confirm production Worker and D1 schema version
+        env:
+          HEALTH_URL: https://hybrid-cloud-fuzzer.braian-n-l.workers.dev/health
+        run: |
+          for attempt in $(seq 1 18); do
+            printf 'Probe %s/18: ' "$attempt"
+            http_code="$(curl --max-time 8 -sS -o /tmp/hybrid-worker-health.json -w '%{http_code}' "$HEALTH_URL" || true)"
+            if [ "$http_code" = '200' ] && jq -e '.ok == true and .schemaVersion >= 4 and .workforceReady == true and .pacingReady == true' /tmp/hybrid-worker-health.json >/dev/null 2>&1; then
+              jq '{ok, service, schemaVersion, workforceReady, pacingReady, database, storage}' /tmp/hybrid-worker-health.json
+              exit 0
+            fi
+            printf 'HTTP %s; expected schemaVersion >= 4 with workforce and pacing\n' "$http_code"
+            sleep 10
+          done
+          echo 'Cloudflare production has not confirmed the new schema/Worker.'
+          exit 1

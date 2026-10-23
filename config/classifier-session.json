@@ -1,0 +1,7 @@
+{
+  "runId": "guided-20261023",
+  "tokenHash": "b3b4b5e2e2ef391513012e3539fbf2a7abd2c478db9b03fd56782f40acd607d2",
+  "durationMinutes": 180,
+  "manifest": "config/demos.json",
+  "dataBranch": "classifier-data"
+}

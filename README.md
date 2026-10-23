@@ -2,6 +2,14 @@
 
 Detector dinámico de controles de juegos. Prueba inicial en GitHub Actions.
 
+## Clasificador guiado: 1–5 y Q
+
+La interfaz de captura manual está en `classifier/`. Abre las demos en Chromium dentro de GitHub Actions, muestra las capturas y ejecuta los controles que marcás. **Q** marca y pulsa un Continue inicial; **1** guarda Spin; **2** activa Antebet y pulsa el Spin guardado; **3** abre menús; **4** ejecuta compras directas; **5** guarda Solo Spin y finaliza sin girar. Incluye roles de opción, confirmar, cancelar, volver y apuesta.
+
+Abrir **Actions → Guided classifier session**. El artefacto **classifier-connection**, publicado al arrancar, contiene el enlace temporal; la clave se entrega por separado. La sesión dura hasta 180 minutos. Las capturas, coordenadas normalizadas, acciones y rutas se guardan en la rama `classifier-data`. [Uso, reproducción y límites](docs/guided-classifier.md).
+
+Se incluye una copia del Hybrid Cloud Fuzzer en `upstream/hybrid-cloud-fuzzer`, fijada al commit `045d403e06f8255d92f1e393a755edfeed5da0c3`. El clasificador reutiliza su validación y comparación visual. El grafo exportado prepara las rutas enseñadas para la exploración posterior; todavía no declara cobertura automática de todos los controles de un juego.
+
 ## Estado de la prueba
 
 La instalación en GitHub y el ciclo completo de la fixture están validados. La selección de Laya y la cobertura de las demos reales todavía no cumplen todos los requisitos; la ejecución conserva esos fallos. Ver el [informe medido del 23 de octubre de 2026](docs/github-validation-2026-10-23.md) y su [evidencia JSON](docs/github-validation-2026-10-23.json) antes de decidir el port.

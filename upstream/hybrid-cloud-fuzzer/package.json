@@ -1,0 +1,41 @@
+{
+  "name": "hybrid-cloud-fuzzer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Multi-provider demo control catalog: structured-first, screenshot fallback, Cloudflare R2/D1 and MCP",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "test": "node --test test/*.test.js",
+    "check": "node --check src/entry.js && node --check src/oauth.js && node --check src/worker.js && node --check src/core.js && node --check src/mcp.js && node --check local/capture.mjs && node --check local/har.js && node --check local/har-report.mjs && node --check local/speed.js && node --check local/speed-control.mjs && node --check local/sync.mjs && node --check local/import-fuzzer.mjs && node --check local/import-github.mjs && node --check local/intro.js && node --check local/select-frame.js && node --check mcp/stdio.mjs && node --check scripts/verify-deployment.mjs && node --check scripts/verify-oauth.mjs && node --check local/rounds.js && node --check local/cloud-client.js && node --check local/loop.js && node --check local/branch-executor.js && node --check local/round-runner.mjs && node --check local/replay.js && node --check local/replay-demo.mjs && node --check src/traces.js && node --check src/workforce.js && node --check local/work-allocation.js && node --check local/workforce.mjs && node --check local/work-role.mjs && node --check local/discover.js && node --check local/structured-classifier.js && node --check local/update-drain.js && node --check src/progress.js && node --check src/action-plan.js && node --check local/progress.js && node --check local/progress-report.mjs && node --check src/provider-pacing.js && node --check src/branches.js",
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "build:cloudflare": "npm run check && npm test",
+    "deploy:cloudflare": "npm run db:remote && npm run deploy",
+    "db:remote": "wrangler d1 migrations apply hybrid-cloud-fuzzer --remote",
+    "db:local": "wrangler d1 migrations apply hybrid-cloud-fuzzer --local",
+    "capture": "node local/capture.mjs",
+    "sync": "node local/sync.mjs",
+    "import": "node local/import-fuzzer.mjs",
+    "import:github": "node local/import-github.mjs",
+    "verify:deploy": "node scripts/verify-deployment.mjs",
+    "verify:oauth": "node scripts/verify-oauth.mjs",
+    "har:report": "node local/har-report.mjs",
+    "speed:control": "node local/speed-control.mjs",
+    "rounds": "node local/round-runner.mjs",
+    "replay:demo": "node local/replay-demo.mjs",
+    "workforce": "node local/workforce.mjs",
+    "work:role": "node local/work-role.mjs"
+  },
+  "dependencies": {
+    "@cloudflare/workers-oauth-provider": "1.2.3",
+    "playwright": "^1.56.1"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.2",
+    "miniflare": "5.20261019.0-beta",
+    "wrangler": "^4.0.0"
+  }
+}

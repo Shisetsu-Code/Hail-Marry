@@ -1,0 +1,17 @@
+{
+  "sources": [
+    {
+      "id": "pragmatic-public-catalogue",
+      "provider": "pragmatic",
+      "enabled": false,
+      "approved": false,
+      "verifiedDemo": true,
+      "indexUrls": [
+        "https://www.pragmaticplay.fun/en/slots/"
+      ],
+      "gameUrlPrefix": "https://www.pragmaticplay.fun/en/slots/",
+      "gamePathPattern": "^/en/slots/[a-z0-9-]+/$",
+      "maxGames": 100
+    }
+  ]
+}

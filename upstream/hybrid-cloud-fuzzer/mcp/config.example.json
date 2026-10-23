@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "hybrid-cloud-fuzzer": {
+      "command": "node",
+      "args": ["C:/Users/YOU/hybrid-cloud-fuzzer/mcp/stdio.mjs"],
+      "env": {
+        "HYBRID_FUZZER_URL": "https://hybrid-cloud-fuzzer.YOUR_ACCOUNT.workers.dev",
+        "HYBRID_MCP_TOKEN": "GET_FROM_SECURE_ENVIRONMENT_NOT_SOURCE_CONTROL"
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "runId": "demo-20261019",
+  "games": [
+    {"provider":"pragmatic","id":"candy-rush","url":"https://www.pragmaticplay.fun/en/slots/candy-rush/"},
+    {"provider":"unknown","id":"other-public-demo","url":"https://example.org/demo","enabled":false}
+  ]
+}

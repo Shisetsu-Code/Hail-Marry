@@ -1,0 +1,123 @@
+name: Guided classifier session
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'classifier/**'
+      - 'config/classifier-session.json'
+      - 'config/demos.json'
+      - 'scripts/start-classifier.mjs'
+      - 'scripts/hold-classifier.mjs'
+      - 'scripts/install-browser-fallback.py'
+      - 'upstream/hybrid-cloud-fuzzer/**'
+      - '.github/workflows/classifier.yml'
+      - 'package*.json'
+
+permissions:
+  contents: write
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+  group: hail-marry-classifier-session
+  cancel-in-progress: false
+
+jobs:
+  classifier:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 210
+    env:
+      OMP_NUM_THREADS: '1'
+      TOKENIZERS_PARALLELISM: 'false'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Install dependencies and repair the Ubuntu mirror
+        timeout-minutes: 4
+        run: |
+          mkdir -p artifacts
+          sudo python3 - <<'PY'
+          from pathlib import Path
+          import re
+          sources = [Path('/etc/apt/sources.list'), Path('/etc/apt/apt-mirrors.txt'), *Path('/etc/apt/sources.list.d').glob('*.list'), *Path('/etc/apt/sources.list.d').glob('*.sources')]
+          for source in sources:
+              if not source.is_file():
+                  continue
+              current = source.read_text()
+              updated = re.sub(r'https?://azure\.archive\.ubuntu\.com(?=/|\s|$)', 'https://archive.ubuntu.com', current)
+              if updated != current:
+                  source.write_text(updated)
+          PY
+          npm ci --ignore-scripts --no-audit --no-fund 2>&1 | tee artifacts/classifier-install-node.log
+      - name: Install browser dependencies
+        timeout-minutes: 4
+        run: npx playwright install-deps chromium 2>&1 | tee artifacts/classifier-install-browser-deps.log
+      - name: Download Chromium with the official mirror fallback
+        timeout-minutes: 4
+        run: |
+          { timeout 90s npx playwright install chromium || timeout 90s python3 scripts/install-browser-fallback.py; } 2>&1 | tee artifacts/classifier-install-browser.log
+      - name: Resolve the browser executable for all test suites
+        run: |
+          node --input-type=module <<'JS'
+          import { chromium } from 'playwright';
+          import { access, appendFile } from 'node:fs/promises';
+          import { constants } from 'node:fs';
+          const executable=process.env.CHROMIUM_EXECUTABLE_PATH||chromium.executablePath();
+          await access(executable,constants.X_OK);
+          await appendFile(process.env.GITHUB_ENV,`CHROMIUM_EXECUTABLE_PATH=${executable}\nCHROMIUM_PATH=${executable}\n`);
+          JS
+      - name: Test existing behavior and the classifier
+        timeout-minutes: 5
+        run: |
+          npm test 2>&1 | tee artifacts/classifier-baseline-tests.log
+          node --test --test-concurrency=2 classifier/test/*.test.mjs 2>&1 | tee artifacts/classifier-tests.log
+      - name: Install verified cloudflared 2026.10.3
+        timeout-minutes: 3
+        run: |
+          curl --fail --location --retry 3 --connect-timeout 15 --max-time 120 \
+            https://github.com/cloudflare/cloudflared/releases/download/2026.10.3/cloudflared-linux-amd64 \
+            --output "$RUNNER_TEMP/cloudflared"
+          echo '053b80b0a23031a038fdbf3c073f59f82b8f1f152aa67971d7383ffafc0dbab0  '"$RUNNER_TEMP/cloudflared" | sha256sum --check --strict
+          chmod 0755 "$RUNNER_TEMP/cloudflared"
+          echo "CLOUDFLARED_PATH=$RUNNER_TEMP/cloudflared" >> "$GITHUB_ENV"
+      - name: Start the authenticated classifier and temporary tunnel
+        timeout-minutes: 6
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: node scripts/start-classifier.mjs
+      - name: Publish connection details before holding the session open
+        uses: actions/upload-artifact@v4
+        with:
+          name: classifier-connection
+          path: artifacts/classifier-session.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Keep the classifier available until its recorded expiration
+        timeout-minutes: 182
+        run: node scripts/hold-classifier.mjs
+      - name: Stop the classifier, browser and tunnel
+        if: always()
+        timeout-minutes: 2
+        run: node scripts/hold-classifier.mjs --stop
+      - name: Save classifier logs and captured data
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: classifier-evidence
+          path: |
+            artifacts/classifier-*.log
+            artifacts/classifier-session.json
+            artifacts/classifier-runtime.json
+            artifacts/classifier-data/
+          if-no-files-found: warn
+          retention-days: 14

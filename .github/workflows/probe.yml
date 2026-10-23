@@ -7,13 +7,16 @@ on:
       - 'src/**'
       - 'python/**'
       - 'scripts/**'
+      - '!scripts/start-classifier.mjs'
+      - '!scripts/hold-classifier.mjs'
       - 'tests/**'
       - 'fixtures/**'
       - 'config/**'
+      - '!config/classifier-session.json'
       - 'package*.json'
       - 'requirements-laya.txt'
       - 'requirements-ocr.txt'
-      - '.github/workflows/**'
+      - '.github/workflows/probe.yml'
   workflow_dispatch:
 
 permissions:

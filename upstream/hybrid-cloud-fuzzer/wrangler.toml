@@ -1,0 +1,29 @@
+name = "hybrid-cloud-fuzzer"
+main = "src/entry.js"
+compatibility_date = "2026-10-01"
+compatibility_flags = ["global_fetch_strictly_public"]
+workers_dev = true
+
+[vars]
+OAUTH_ISSUER = "https://hybrid-cloud-fuzzer.braian-n-l.workers.dev"
+
+[observability]
+enabled = true
+redact_query_string = true
+
+[observability.traces]
+enabled = true
+
+[[kv_namespaces]]
+binding = "OAUTH_KV"
+id = "8c054ec6fc804ef1a7bca1120470d752"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hybrid-cloud-fuzzer"
+database_id = "7b32a769-b6fd-4099-9ccb-f993eabc091e"
+migrations_dir = "migrations"
+
+[[r2_buckets]]
+binding = "IMAGES"
+bucket_name = "hybrid-fuzzer-images"
