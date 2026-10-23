@@ -2,6 +2,10 @@
 
 Detector dinámico de controles de juegos. Prueba inicial en GitHub Actions.
 
+## Estado de la prueba
+
+La instalación en GitHub y el ciclo completo de la fixture están validados. La selección de Laya y la cobertura de las demos reales todavía no cumplen todos los requisitos; la ejecución conserva esos fallos. Ver el [informe medido del 23 de octubre de 2026](docs/github-validation-2026-10-23.md) y su [evidencia JSON](docs/github-validation-2026-10-23.json) antes de decidir el port.
+
 ## Flujo
 
 1. Abre una DEMO pública y deja **60 segundos sin inputs** desde el inicio de navegación.

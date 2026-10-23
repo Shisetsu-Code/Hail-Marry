@@ -1,0 +1,3058 @@
+{
+  "schemaVersion": 1,
+  "interpretation": {
+    "availability": "Sampled input-target evidence, not action success.",
+    "counts": "Control records and distinct UHT routes are separate; neither implies unique available gameplay buttons.",
+    "smoke": "14 expected cases, 9 mandatory assertions; other cases are diagnostic only. Missing cases never count as passed.",
+    "privacy": "Launch URLs and URL substrings omitted; no HTML or full control dumps included."
+  },
+  "runtimeModel": {
+    "presence": "present",
+    "source": "laya-smoke.json",
+    "ready": true,
+    "runtime": {
+      "layaVersion": "0.4.14",
+      "torchVersion": "2.8.0+cpu",
+      "device": "cpu",
+      "threads": 2
+    },
+    "model": {
+      "id": "convaiinnovations/laya-multilingual",
+      "revision": "1720e3e3357cfe1e281542e223f8273b0890ca34"
+    },
+    "warmup": {
+      "status": "needs_review",
+      "action": "none",
+      "candidateId": null,
+      "confidence": 0.6299,
+      "inference": true,
+      "reason": "low_confidence",
+      "elapsedMs": 411.64,
+      "rawIntent": {
+        "type": "choice",
+        "choice": "continue",
+        "probabilities": {
+          "continue": 0.6576,
+          "dismiss": 0.0784,
+          "none": 0.264
+        },
+        "confidence": 0.2474,
+        "answer_confidence": 0.6576,
+        "action": {
+          "act_probability": 1
+        }
+      },
+      "rawTarget": {
+        "type": "choice",
+        "choice": "control_0",
+        "probabilities": {
+          "control_0": 0.6299,
+          "no_control": 0.3701
+        },
+        "confidence": 0.0493,
+        "answer_confidence": 0.6299,
+        "action": {
+          "act_probability": 1
+        }
+      },
+      "usage": {
+        "input_tokens": 217,
+        "output_tokens": 0,
+        "state_tokens": 40,
+        "state_tokens_dropped": 0,
+        "truncated": false,
+        "truncated_questions": []
+      },
+      "stateTokens": 40,
+      "guard": null
+    }
+  },
+  "smoke": {
+    "presence": "present",
+    "expectedCases": 14,
+    "observedExpectedCases": 14,
+    "unexpectedCaseNames": [],
+    "requiredAssertions": {
+      "total": 9,
+      "passed": 6,
+      "failed": 3,
+      "missing": 0,
+      "allPassed": false
+    },
+    "results": [
+      {
+        "name": "intro",
+        "presence": "present",
+        "input": {
+          "text": "Welcome to the game. CLICK TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "CLICK TO CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "continue",
+          "candidateId": "c0",
+          "confidence": 0.8136,
+          "inference": true,
+          "reason": "intro_action",
+          "elapsedMs": 452.94,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.8962,
+              "dismiss": 0.0387,
+              "none": 0.0651
+            },
+            "confidence": 0.6342,
+            "answer_confidence": 0.8962,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.8136,
+              "no_control": 0.1864
+            },
+            "confidence": 0.3062,
+            "answer_confidence": 0.8136,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 225,
+            "output_tokens": 0,
+            "state_tokens": 44,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 44,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "statusOk": true,
+            "actionContinue": true,
+            "expectedCandidate": true,
+            "confidenceAtLeast080": true
+          }
+        }
+      },
+      {
+        "name": "gameplay",
+        "presence": "present",
+        "input": {
+          "text": "Balance 1000.00. Bet 1.00. SPIN. BUY BONUS.",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "SPIN",
+              "kind": "control"
+            },
+            {
+              "id": "c1",
+              "text": "BUY BONUS",
+              "kind": "control"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.6295,
+          "inference": true,
+          "reason": "no_intro",
+          "elapsedMs": 518.66,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "none",
+            "probabilities": {
+              "continue": 0.1803,
+              "dismiss": 0.1903,
+              "none": 0.6295
+            },
+            "confidence": 0.1663,
+            "answer_confidence": 0.6295,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.7581,
+              "control_1": 0.0458,
+              "no_control": 0.1962
+            },
+            "confidence": 0.3896,
+            "answer_confidence": 0.7581,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 292,
+            "output_tokens": 0,
+            "state_tokens": 75,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 75,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "actionNone": true
+          }
+        }
+      },
+      {
+        "name": "session-ocr-exact",
+        "presence": "present",
+        "input": {
+          "text": "CLICK TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "CLICK TO CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "continue",
+          "candidateId": "c0",
+          "confidence": 0.8749,
+          "inference": true,
+          "reason": "intro_action",
+          "elapsedMs": 409.05,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.8749,
+              "dismiss": 0.0356,
+              "none": 0.0895
+            },
+            "confidence": 0.5888,
+            "answer_confidence": 0.8749,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.9455,
+              "no_control": 0.0545
+            },
+            "confidence": 0.6948,
+            "answer_confidence": 0.9455,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 215,
+            "output_tokens": 0,
+            "state_tokens": 39,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 39,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "statusOk": true,
+            "actionContinue": true,
+            "expectedCandidate": true,
+            "confidenceAtLeast080": true
+          }
+        }
+      },
+      {
+        "name": "label-titlecase",
+        "presence": "present",
+        "input": {
+          "text": "Click to continue",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "Click to continue",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "continue",
+          "candidateId": "c0",
+          "confidence": 0.8078,
+          "inference": true,
+          "reason": "intro_action",
+          "elapsedMs": 396.73,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.8078,
+              "dismiss": 0.0482,
+              "none": 0.1441
+            },
+            "confidence": 0.456,
+            "answer_confidence": 0.8078,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.9013,
+              "no_control": 0.0987
+            },
+            "confidence": 0.5352,
+            "answer_confidence": 0.9013,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 215,
+            "output_tokens": 0,
+            "state_tokens": 39,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 39,
+          "guard": null
+        },
+        "assertion": {
+          "required": false,
+          "status": "diagnostic_only"
+        }
+      },
+      {
+        "name": "welcome-context",
+        "presence": "present",
+        "input": {
+          "text": "Welcome. CLICK TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "CLICK TO CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.5525,
+          "inference": true,
+          "reason": "low_confidence",
+          "elapsedMs": 411.24,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.839,
+              "dismiss": 0.073,
+              "none": 0.088
+            },
+            "confidence": 0.4973,
+            "answer_confidence": 0.839,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.5525,
+              "no_control": 0.4475
+            },
+            "confidence": 0.008,
+            "answer_confidence": 0.5525,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 219,
+            "output_tokens": 0,
+            "state_tokens": 41,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 41,
+          "guard": null
+        },
+        "assertion": {
+          "required": false,
+          "status": "diagnostic_only"
+        }
+      },
+      {
+        "name": "spin-only",
+        "presence": "present",
+        "input": {
+          "text": "SPIN",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "SPIN",
+              "kind": "control"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.5381,
+          "inference": true,
+          "reason": "no_intro",
+          "elapsedMs": 387.5,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "none",
+            "probabilities": {
+              "continue": 0.3452,
+              "dismiss": 0.1166,
+              "none": 0.5381
+            },
+            "confidence": 0.1341,
+            "answer_confidence": 0.5381,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.9844,
+              "no_control": 0.0156
+            },
+            "confidence": 0.884,
+            "answer_confidence": 0.9844,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 205,
+            "output_tokens": 0,
+            "state_tokens": 35,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 35,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "actionNone": true
+          }
+        }
+      },
+      {
+        "name": "buy-only",
+        "presence": "present",
+        "input": {
+          "text": "BUY BONUS",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "BUY BONUS",
+              "kind": "control"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.4802,
+          "inference": true,
+          "reason": "no_intro",
+          "elapsedMs": 396.24,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "none",
+            "probabilities": {
+              "continue": 0.2777,
+              "dismiss": 0.2421,
+              "none": 0.4802
+            },
+            "confidence": 0.0429,
+            "answer_confidence": 0.4802,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.9113,
+              "no_control": 0.0887
+            },
+            "confidence": 0.568,
+            "answer_confidence": 0.9113,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 210,
+            "output_tokens": 0,
+            "state_tokens": 37,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 37,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "actionNone": true
+          }
+        }
+      },
+      {
+        "name": "session-ocr-anywhere",
+        "presence": "present",
+        "input": {
+          "text": "CLICK ANYWHERE TO START",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "CLICK ANYWHERE TO START",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "continue",
+          "candidateId": "c0",
+          "confidence": 0.8224,
+          "inference": true,
+          "reason": "intro_action",
+          "elapsedMs": 414.56,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.8643,
+              "dismiss": 0.0252,
+              "none": 0.1105
+            },
+            "confidence": 0.5793,
+            "answer_confidence": 0.8643,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.8224,
+              "no_control": 0.1776
+            },
+            "confidence": 0.3251,
+            "answer_confidence": 0.8224,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 225,
+            "output_tokens": 0,
+            "state_tokens": 43,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 43,
+          "guard": null
+        },
+        "assertion": {
+          "required": false,
+          "status": "diagnostic_only"
+        }
+      },
+      {
+        "name": "session-ocr-continue",
+        "presence": "present",
+        "input": {
+          "text": "CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.7636,
+          "inference": true,
+          "reason": "low_confidence",
+          "elapsedMs": 386.64,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.7636,
+              "dismiss": 0.0424,
+              "none": 0.194
+            },
+            "confidence": 0.401,
+            "answer_confidence": 0.7636,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.7904,
+              "no_control": 0.2096
+            },
+            "confidence": 0.2593,
+            "answer_confidence": 0.7904,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 205,
+            "output_tokens": 0,
+            "state_tokens": 35,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 35,
+          "guard": null
+        },
+        "assertion": {
+          "required": false,
+          "status": "diagnostic_only"
+        }
+      },
+      {
+        "name": "session-ocr-bordered-continue",
+        "presence": "present",
+        "input": {
+          "text": "| CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "| CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.7012,
+          "inference": true,
+          "reason": "low_confidence",
+          "elapsedMs": 385.47,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.9829,
+              "dismiss": 0.0041,
+              "none": 0.013
+            },
+            "confidence": 0.9125,
+            "answer_confidence": 0.9829,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.7012,
+              "no_control": 0.2988
+            },
+            "confidence": 0.1201,
+            "answer_confidence": 0.7012,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 206,
+            "output_tokens": 0,
+            "state_tokens": 35,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 35,
+          "guard": null
+        },
+        "assertion": {
+          "required": false,
+          "status": "diagnostic_only"
+        }
+      },
+      {
+        "name": "session-ocr-tap",
+        "presence": "present",
+        "input": {
+          "text": "TAP TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "TAP TO CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.6507,
+          "inference": true,
+          "reason": "low_confidence",
+          "elapsedMs": 396.56,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.6507,
+              "dismiss": 0.0564,
+              "none": 0.2929
+            },
+            "confidence": 0.2705,
+            "answer_confidence": 0.6507,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.7921,
+              "no_control": 0.2079
+            },
+            "confidence": 0.2626,
+            "answer_confidence": 0.7921,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 215,
+            "output_tokens": 0,
+            "state_tokens": 39,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 39,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "failed",
+          "checks": {
+            "realInference": true,
+            "statusOk": false,
+            "actionContinue": false,
+            "expectedCandidate": false,
+            "confidenceAtLeast080": false
+          }
+        }
+      },
+      {
+        "name": "mixed-controls",
+        "presence": "present",
+        "input": {
+          "text": "CLICK TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "SPIN",
+              "kind": "control"
+            },
+            {
+              "id": "c1",
+              "text": "CLICK TO CONTINUE",
+              "kind": "ocr"
+            },
+            {
+              "id": "c2",
+              "text": "BUY BONUS",
+              "kind": "control"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.9579,
+          "inference": true,
+          "reason": "blocked_target_label",
+          "elapsedMs": 541.43,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.9579,
+              "dismiss": 0.0146,
+              "none": 0.0276
+            },
+            "confidence": 0.8163,
+            "answer_confidence": 0.9579,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.9938,
+              "control_1": 0.005,
+              "control_2": 0.0003,
+              "no_control": 0.001
+            },
+            "confidence": 0.97,
+            "answer_confidence": 0.9938,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 306,
+            "output_tokens": 0,
+            "state_tokens": 78,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 78,
+          "guard": {
+            "candidateId": "c0",
+            "text": "SPIN",
+            "matchedTerm": "spin"
+          }
+        },
+        "assertion": {
+          "required": true,
+          "status": "failed",
+          "checks": {
+            "realInference": true,
+            "statusOk": false,
+            "actionContinue": false,
+            "expectedCandidate": false,
+            "confidenceAtLeast080": true
+          }
+        }
+      },
+      {
+        "name": "mixed-controls-reordered",
+        "presence": "present",
+        "input": {
+          "text": "CLICK TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "BUY BONUS",
+              "kind": "control"
+            },
+            {
+              "id": "c1",
+              "text": "SPIN",
+              "kind": "control"
+            },
+            {
+              "id": "c2",
+              "text": "CLICK TO CONTINUE",
+              "kind": "ocr"
+            }
+          ]
+        },
+        "decision": {
+          "status": "needs_review",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.7052,
+          "inference": true,
+          "reason": "low_confidence",
+          "elapsedMs": 530.63,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "continue",
+            "probabilities": {
+              "continue": 0.7052,
+              "dismiss": 0.1013,
+              "none": 0.1935
+            },
+            "confidence": 0.2755,
+            "answer_confidence": 0.7052,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_2",
+            "probabilities": {
+              "control_0": 0.0005,
+              "control_1": 0.0112,
+              "control_2": 0.9871,
+              "no_control": 0.0013
+            },
+            "confidence": 0.9459,
+            "answer_confidence": 0.9871,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 306,
+            "output_tokens": 0,
+            "state_tokens": 78,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 78,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "failed",
+          "checks": {
+            "realInference": true,
+            "statusOk": false,
+            "actionContinue": false,
+            "expectedCandidate": false,
+            "confidenceAtLeast080": false
+          }
+        }
+      },
+      {
+        "name": "purchase-to-continue",
+        "presence": "present",
+        "input": {
+          "text": "BUY BONUS TO CONTINUE",
+          "candidates": [
+            {
+              "id": "c0",
+              "text": "BUY BONUS TO CONTINUE",
+              "kind": "control"
+            }
+          ]
+        },
+        "decision": {
+          "status": "ok",
+          "action": "none",
+          "candidateId": null,
+          "confidence": 0.6082,
+          "inference": true,
+          "reason": "no_intro",
+          "elapsedMs": 409.45,
+          "rawIntent": {
+            "type": "choice",
+            "choice": "none",
+            "probabilities": {
+              "continue": 0.2095,
+              "dismiss": 0.1823,
+              "none": 0.6082
+            },
+            "confidence": 0.1442,
+            "answer_confidence": 0.6082,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "rawTarget": {
+            "type": "choice",
+            "choice": "control_0",
+            "probabilities": {
+              "control_0": 0.973,
+              "no_control": 0.027
+            },
+            "confidence": 0.8209,
+            "answer_confidence": 0.973,
+            "action": {
+              "act_probability": 1
+            }
+          },
+          "usage": {
+            "input_tokens": 220,
+            "output_tokens": 0,
+            "state_tokens": 41,
+            "state_tokens_dropped": 0,
+            "truncated": false,
+            "truncated_questions": []
+          },
+          "stateTokens": 41,
+          "guard": null
+        },
+        "assertion": {
+          "required": true,
+          "status": "passed",
+          "checks": {
+            "realInference": true,
+            "actionNone": true
+          }
+        }
+      }
+    ]
+  },
+  "readIssues": [],
+  "source": {
+    "repository": "Shisetsu-Code/Hail-Marry",
+    "testedCommit": "e9e905a4259bdf2e0123e8961aeefa1675060c39",
+    "workflowRunId": 40024964242,
+    "workflowJobId": 120658729060,
+    "workflowUrl": "https://github.com/Shisetsu-Code/Hail-Marry/actions/runs/40024964242",
+    "conclusion": "failure",
+    "unitTests": {
+      "total": 45,
+      "passed": 45,
+      "failed": 0
+    },
+    "artifacts": [
+      {
+        "id": 12532153113,
+        "name": "hail-marry-evidence",
+        "digest": "sha256:b5ab2c1b85f116692a53c0cb159db34504608f79f5cd9a5838854547f517455d",
+        "bytes": 6862367,
+        "expiresAt": "2026-11-06T21:16:34Z"
+      },
+      {
+        "id": 12532132510,
+        "name": "laya-decision-diagnostics",
+        "digest": "sha256:c0eaf15e880192561aaa64a09cd48c396e58d2889db04cf3ef4244fc09c3ab28",
+        "bytes": 5077,
+        "expiresAt": "2026-11-06T21:13:40Z"
+      }
+    ],
+    "steps": [
+      {
+        "name": "Set up job",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/checkout@v4",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-node@v4",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/setup-python@v5",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/cache@v4",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install Node dependencies and Tesseract",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install OCR preprocessing",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install browser system dependencies",
+        "conclusion": "success"
+      },
+      {
+        "name": "Download Chromium with bounded mirror fallback",
+        "conclusion": "success"
+      },
+      {
+        "name": "Unit and browser regression tests",
+        "conclusion": "success"
+      },
+      {
+        "name": "Install pinned CPU Laya",
+        "conclusion": "success"
+      },
+      {
+        "name": "Start real local Laya model",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify real model inference",
+        "conclusion": "failure"
+      },
+      {
+        "name": "Save model decision diagnostics",
+        "conclusion": "success"
+      },
+      {
+        "name": "Verify 60-second load and dynamic action cycle",
+        "conclusion": "success"
+      },
+      {
+        "name": "Observe three public demos concurrently",
+        "conclusion": "failure"
+      },
+      {
+        "name": "Report measured results",
+        "conclusion": "success"
+      },
+      {
+        "name": "Run actions/upload-artifact@v4",
+        "conclusion": "success"
+      },
+      {
+        "name": "Stop local inference service",
+        "conclusion": "success"
+      },
+      {
+        "name": "Post Run actions/cache@v4",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Post Run actions/setup-python@v5",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Post Run actions/setup-node@v4",
+        "conclusion": "skipped"
+      },
+      {
+        "name": "Post Run actions/checkout@v4",
+        "conclusion": "success"
+      },
+      {
+        "name": "Complete job",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "fixture": {
+    "result": {
+      "status": "passed",
+      "checks": [
+        "60s without input; canvas intro read by Tesseract",
+        "Real Laya chose intro; one dispatched click; post-action delay>=1500ms",
+        "Available/disabled/hidden/covered/offscreen cases classified separately",
+        "After-action dynamic discovery: menu open and close",
+        "40ms control was never promoted to available or clicked"
+      ],
+      "fixture": {
+        "mode": "canvas",
+        "phase": "base",
+        "inputCount": 3,
+        "introClicks": 1,
+        "spinCount": 0,
+        "menuClicks": 1,
+        "menuOpen": false,
+        "menuPending": false,
+        "settingsClicks": 0,
+        "closeClicks": 1,
+        "blockedClicks": 0,
+        "offscreenClicks": 0,
+        "collectClicks": 0,
+        "transientClicks": 0,
+        "canvasClicks": 1,
+        "soundOn": true,
+        "flashing": false
+      },
+      "actions": 3,
+      "initialWaitElapsedMs": 60001,
+      "observations": 8
+    },
+    "report": {
+      "presence": "present",
+      "startedAt": "2026-10-23T21:13:42.339Z",
+      "settings": {
+        "initialWaitMs": 60000,
+        "settleMs": 1500,
+        "sampleGapMs": 300
+      },
+      "httpStatus": 200,
+      "initialWaitElapsedMs": 60001,
+      "errors": [],
+      "observationCount": 8,
+      "actionRecords": 3,
+      "dispatchedInputs": 3,
+      "actions": [
+        {
+          "kind": "intro",
+          "candidateId": "ocr:click to continue",
+          "text": "CLICK TO CONTINUE",
+          "point": {
+            "x": 640,
+            "y": 434
+          },
+          "dispatchedAt": "2026-10-23T21:14:46.367Z",
+          "inputDispatched": true,
+          "actionConfirmed": false,
+          "settleElapsedMs": 1502,
+          "promptDisappeared": true,
+          "observationIndex": 2
+        },
+        {
+          "kind": "explicit-control",
+          "candidateId": "frame-1:dom:1792790022344.9:html:nth-of-type(1) > body:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(2) > button:nth-of-type(1)",
+          "text": "Menu",
+          "point": {
+            "x": 259.3203125,
+            "y": 529.734375
+          },
+          "dispatchedAt": "2026-10-23T21:14:51.352Z",
+          "inputDispatched": true,
+          "actionConfirmed": false,
+          "settleElapsedMs": 1502,
+          "observationIndex": 4,
+          "stateChanged": true
+        },
+        {
+          "kind": "explicit-control",
+          "candidateId": "frame-1:dom:1792790022344.9:html:nth-of-type(1) > body:nth-of-type(1) > main:nth-of-type(1) > div:nth-of-type(2) > section:nth-of-type(1) > button:nth-of-type(2)",
+          "text": "Close menu",
+          "point": {
+            "x": 771.71875,
+            "y": 389.703125
+          },
+          "dispatchedAt": "2026-10-23T21:14:56.286Z",
+          "inputDispatched": true,
+          "actionConfirmed": false,
+          "settleElapsedMs": 1501,
+          "observationIndex": 6,
+          "stateChanged": true
+        }
+      ],
+      "decisions": [
+        {
+          "at": "2026-10-23T21:14:44.271Z",
+          "input": {
+            "text": "CLICK TO CONTINUE",
+            "candidates": [
+              {
+                "id": "c0",
+                "text": "CLICK TO CONTINUE",
+                "kind": "ocr"
+              }
+            ]
+          },
+          "decision": {
+            "status": "ok",
+            "action": "continue",
+            "candidateId": "c0",
+            "confidence": 0.8749,
+            "inference": true,
+            "reason": "intro_action",
+            "elapsedMs": 399.93,
+            "rawIntent": {
+              "type": "choice",
+              "choice": "continue",
+              "probabilities": {
+                "continue": 0.8749,
+                "dismiss": 0.0356,
+                "none": 0.0895
+              },
+              "confidence": 0.5888,
+              "answer_confidence": 0.8749,
+              "action": {
+                "act_probability": 1
+              }
+            },
+            "rawTarget": {
+              "type": "choice",
+              "choice": "control_0",
+              "probabilities": {
+                "control_0": 0.9455,
+                "no_control": 0.0545
+              },
+              "confidence": 0.6948,
+              "answer_confidence": 0.9455,
+              "action": {
+                "act_probability": 1
+              }
+            },
+            "usage": {
+              "input_tokens": 215,
+              "output_tokens": 0,
+              "state_tokens": 39,
+              "state_tokens_dropped": 0,
+              "truncated": false,
+              "truncated_questions": []
+            },
+            "stateTokens": 39,
+            "guard": null
+          }
+        }
+      ],
+      "persistenceGapMs": {
+        "count": 80,
+        "min": 293,
+        "max": 302,
+        "outside200to400": 0
+      },
+      "finalCounts": {
+        "controlRecords": 10,
+        "stableRecords": 9,
+        "availableRecords": 2,
+        "availabilityCounts": {
+          "unavailable": 8,
+          "available": 2
+        },
+        "sourceCounts": {
+          "dom": 10
+        },
+        "stableVisibleEnabledRecords": 3,
+        "stableVisibleEnabledWithBoundsRecords": 3,
+        "uht": {
+          "records": 0,
+          "distinctRoutes": 0,
+          "stableVisibleEnabledRecords": 0,
+          "stableVisibleEnabledDistinctRoutes": 0,
+          "stableVisibleEnabledRoutes": [],
+          "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+        }
+      },
+      "timingAndStopEvents": [
+        {
+          "type": "initial-wait-complete",
+          "at": "2026-10-23T21:14:42.341Z",
+          "elapsedMs": 60001
+        },
+        {
+          "type": "post-action-wait-complete",
+          "at": "2026-10-23T21:14:47.877Z",
+          "elapsedMs": 1502
+        },
+        {
+          "type": "post-action-wait-complete",
+          "at": "2026-10-23T21:14:52.856Z",
+          "elapsedMs": 1502
+        },
+        {
+          "type": "post-action-wait-complete",
+          "at": "2026-10-23T21:14:57.790Z",
+          "elapsedMs": 1501
+        }
+      ],
+      "observations": [
+        {
+          "index": 0,
+          "reason": "initial",
+          "elapsedMs": 1519,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 0,
+            "availabilityCounts": {
+              "unavailable": 10
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 0,
+            "stableVisibleEnabledWithBoundsRecords": 0,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 293,
+            "max": 294,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "000-initial.png",
+            "recordedSha256": "58cc482e621cbd7e6b3a6a2879ecded7710cc1b92ee336fe6b60ad3eb3d97e96",
+            "actualSha256": "58cc482e621cbd7e6b3a6a2879ecded7710cc1b92ee336fe6b60ad3eb3d97e96",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1157,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 199
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 200
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 230
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 220
+              }
+            ],
+            "introText": [
+              {
+                "text": "CLICK TO CONTINUE",
+                "confidence": 95.62262500000001,
+                "readings": [
+                  "original-psm6"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "index": 1,
+          "reason": "intro-revalidate",
+          "elapsedMs": 1509,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 0,
+            "availabilityCounts": {
+              "unavailable": 10
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 0,
+            "stableVisibleEnabledWithBoundsRecords": 0,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 300,
+            "max": 300,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "001-intro-revalidate.png",
+            "recordedSha256": "58cc482e621cbd7e6b3a6a2879ecded7710cc1b92ee336fe6b60ad3eb3d97e96",
+            "actualSha256": "58cc482e621cbd7e6b3a6a2879ecded7710cc1b92ee336fe6b60ad3eb3d97e96",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1162,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 198
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 201
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 231
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 221
+              }
+            ],
+            "introText": [
+              {
+                "text": "CLICK TO CONTINUE",
+                "confidence": 95.62262500000001,
+                "readings": [
+                  "original-psm6"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "index": 2,
+          "reason": "after-intro",
+          "elapsedMs": 1587,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 2,
+            "availabilityCounts": {
+              "unavailable": 8,
+              "available": 2
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 3,
+            "stableVisibleEnabledWithBoundsRecords": 3,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 301,
+            "max": 301,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "002-after-intro.png",
+            "recordedSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "actualSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1233,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 246
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 198
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 279
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 205
+              }
+            ],
+            "introText": []
+          }
+        },
+        {
+          "index": 3,
+          "reason": "action-revalidate",
+          "elapsedMs": 1575,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 2,
+            "availabilityCounts": {
+              "unavailable": 8,
+              "available": 2
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 3,
+            "stableVisibleEnabledWithBoundsRecords": 3,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 300,
+            "max": 300,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "003-action-revalidate.png",
+            "recordedSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "actualSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1223,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 248
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 191
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 275
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 203
+              }
+            ],
+            "introText": []
+          }
+        },
+        {
+          "index": 4,
+          "reason": "after-action",
+          "elapsedMs": 1555,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 4,
+            "availabilityCounts": {
+              "unavailable": 6,
+              "available": 4
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 5,
+            "stableVisibleEnabledWithBoundsRecords": 5,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 300,
+            "max": 301,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "004-after-action.png",
+            "recordedSha256": "a871d1165755307f4c59e63d651078cb5c1e817f8d63abab7b36c33a68698b27",
+            "actualSha256": "a871d1165755307f4c59e63d651078cb5c1e817f8d63abab7b36c33a68698b27",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1205,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 225
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 5,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 211
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 268
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 200
+              }
+            ],
+            "introText": []
+          }
+        },
+        {
+          "index": 5,
+          "reason": "action-revalidate",
+          "elapsedMs": 1562,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 4,
+            "availabilityCounts": {
+              "unavailable": 6,
+              "available": 4
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 5,
+            "stableVisibleEnabledWithBoundsRecords": 5,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 301,
+            "max": 302,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "005-action-revalidate.png",
+            "recordedSha256": "a871d1165755307f4c59e63d651078cb5c1e817f8d63abab7b36c33a68698b27",
+            "actualSha256": "a871d1165755307f4c59e63d651078cb5c1e817f8d63abab7b36c33a68698b27",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1208,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 228
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 5,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 211
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 272
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 198
+              }
+            ],
+            "introText": []
+          }
+        },
+        {
+          "index": 6,
+          "reason": "after-action",
+          "elapsedMs": 1571,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 10,
+            "availableRecords": 2,
+            "availabilityCounts": {
+              "unavailable": 8,
+              "available": 2
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 3,
+            "stableVisibleEnabledWithBoundsRecords": 3,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 0,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 301,
+            "max": 301,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "006-after-action.png",
+            "recordedSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "actualSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1218,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 241
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 195
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 270
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 207
+              }
+            ],
+            "introText": []
+          }
+        },
+        {
+          "index": 7,
+          "reason": "40ms-flicker",
+          "elapsedMs": 1579,
+          "counts": {
+            "controlRecords": 10,
+            "stableRecords": 9,
+            "availableRecords": 2,
+            "availabilityCounts": {
+              "unavailable": 8,
+              "available": 2
+            },
+            "sourceCounts": {
+              "dom": 10
+            },
+            "stableVisibleEnabledRecords": 3,
+            "stableVisibleEnabledWithBoundsRecords": 3,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "transientRecords": 1,
+          "persistenceGapMs": {
+            "count": 10,
+            "min": 301,
+            "max": 302,
+            "outside200to400": 0
+          },
+          "screenshot": {
+            "file": "007-40ms-flicker.png",
+            "recordedSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "actualSha256": "3044b8c3d44b9411934bb29f534e2d8d5aeb800d48d39d507bacfa4d5a6f099c",
+            "status": "match"
+          },
+          "coverage": {
+            "complete": true,
+            "errors": [],
+            "frameWarnings": []
+          },
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 1225,
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 6,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 244
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 3,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 198
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 4,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 271
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 0,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 207
+              }
+            ],
+            "introText": []
+          }
+        }
+      ],
+      "targetVerifications": [
+        {
+          "at": "2026-10-23T21:14:46.367Z",
+          "candidateId": "ocr:click to continue",
+          "expectedText": "CLICK TO CONTINUE",
+          "unchangedPixels": true,
+          "textMatched": true,
+          "before": "action-crop-0.png",
+          "after": "action-crop-0-after.png",
+          "beforeSha256": "5d415a4fe9c59bc2350dc33423fbf7b20fa41304bc2e9fc26be2e832a37d1015",
+          "afterSha256": "5d415a4fe9c59bc2350dc33423fbf7b20fa41304bc2e9fc26be2e832a37d1015",
+          "ocr": {
+            "status": "ok",
+            "elapsedMs": 542,
+            "lines": [
+              {
+                "text": "CLICK TO CONTINUE",
+                "confidence": 95.82960233333334,
+                "bounds": {
+                  "x": 8,
+                  "y": 8,
+                  "width": 314,
+                  "height": 22
+                },
+                "readings": [
+                  "original-psm11",
+                  "original-psm6",
+                  "rb-psm11",
+                  "gb-psm11"
+                ]
+              }
+            ],
+            "passes": [
+              {
+                "name": "original-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 1,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 112
+              },
+              {
+                "name": "original-psm6",
+                "psm": 6,
+                "status": "ok",
+                "lines": 1,
+                "scaleX": 1,
+                "scaleY": 1,
+                "elapsedMs": 107
+              },
+              {
+                "name": "rb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 1,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 124
+              },
+              {
+                "name": "gb-psm11",
+                "psm": 11,
+                "status": "ok",
+                "lines": 1,
+                "scaleX": 3,
+                "scaleY": 3,
+                "elapsedMs": 127
+              }
+            ]
+          }
+        }
+      ]
+    }
+  },
+  "live": {
+    "elapsedMs": 92994,
+    "concurrency": 3,
+    "initialWaitMs": 60000,
+    "summaryPresence": "present",
+    "demos": [
+      {
+        "id": "pragmatic-3-dancing-monkeys",
+        "executionStatus": "fulfilled",
+        "reportedSummary": {
+          "provider": "pragmatic",
+          "status": "needs_review",
+          "available": 0,
+          "stableEnabledCandidates": 24,
+          "controls": 225,
+          "transient": 0,
+          "actions": 0
+        },
+        "report": {
+          "presence": "present",
+          "startedAt": "2026-10-23T21:15:01.680Z",
+          "finishedAt": "2026-10-23T21:16:14.091Z",
+          "settings": {
+            "initialWaitMs": 60000,
+            "settleMs": 1500,
+            "sampleGapMs": 300
+          },
+          "httpStatus": 200,
+          "initialWaitElapsedMs": 60003,
+          "errors": [],
+          "observationCount": 1,
+          "actionRecords": 0,
+          "dispatchedInputs": 0,
+          "actions": [],
+          "decisions": [],
+          "persistenceGapMs": {
+            "count": 225,
+            "min": 347,
+            "max": 367,
+            "outside200to400": 0
+          },
+          "finalCounts": {
+            "controlRecords": 225,
+            "stableRecords": 225,
+            "availableRecords": 0,
+            "availabilityCounts": {
+              "unavailable": 201,
+              "unknown": 24
+            },
+            "sourceCounts": {
+              "uht": 225
+            },
+            "stableVisibleEnabledRecords": 24,
+            "stableVisibleEnabledWithBoundsRecords": 24,
+            "uht": {
+              "records": 225,
+              "distinctRoutes": 138,
+              "stableVisibleEnabledRecords": 24,
+              "stableVisibleEnabledDistinctRoutes": 9,
+              "stableVisibleEnabledRoutes": [
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/AutoplayButtonsHolder/AutoplayButtons/AutoplayOpenContainer/AutoplayOpen/AutoplayOpenButton",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/LeftContent/Settings/ButtonOpen/ButtonOpen",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/LeftContent/SoundButtons/SoundOff",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/Information/MoneyAndCoinsSwitcher",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/Paytable/Paytable_Button_Open",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/BetButtons/BetDown_Button",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/BetButtons/BetUp_Button",
+                "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/SpinButtons/StartSpin_Button",
+                "GameRoot/UI Root/XTRoot/Root/Game/BuyFeature/ContentBuyFeature/Button/ButtonCollider"
+              ],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "timingAndStopEvents": [
+            {
+              "type": "initial-wait-complete",
+              "at": "2026-10-23T21:16:01.685Z",
+              "elapsedMs": 60003
+            }
+          ],
+          "observations": [
+            {
+              "index": 0,
+              "reason": "initial",
+              "elapsedMs": 12395,
+              "counts": {
+                "controlRecords": 225,
+                "stableRecords": 225,
+                "availableRecords": 0,
+                "availabilityCounts": {
+                  "unavailable": 201,
+                  "unknown": 24
+                },
+                "sourceCounts": {
+                  "uht": 225
+                },
+                "stableVisibleEnabledRecords": 24,
+                "stableVisibleEnabledWithBoundsRecords": 24,
+                "uht": {
+                  "records": 225,
+                  "distinctRoutes": 138,
+                  "stableVisibleEnabledRecords": 24,
+                  "stableVisibleEnabledDistinctRoutes": 9,
+                  "stableVisibleEnabledRoutes": [
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/AutoplayButtonsHolder/AutoplayButtons/AutoplayOpenContainer/AutoplayOpen/AutoplayOpenButton",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/LeftContent/Settings/ButtonOpen/ButtonOpen",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/BottomBar/Elements/LeftContent/SoundButtons/SoundOff",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/Information/MoneyAndCoinsSwitcher",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/Paytable/Paytable_Button_Open",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/BetButtons/BetDown_Button",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/BetButtons/BetUp_Button",
+                    "GameRoot/UI Root/XTRoot/Root/GUI/Interface/TopBar/RightGroup/SpinButtons/StartSpin_Button",
+                    "GameRoot/UI Root/XTRoot/Root/Game/BuyFeature/ContentBuyFeature/Button/ButtonCollider"
+                  ],
+                  "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+                }
+              },
+              "transientRecords": 0,
+              "persistenceGapMs": {
+                "count": 225,
+                "min": 347,
+                "max": 367,
+                "outside200to400": 0
+              },
+              "screenshot": {
+                "file": "000-initial.png",
+                "recordedSha256": "28bf9ab0ac20af3a9269f9a9c225c7f5e5d898bd6921f2cc5f9532c026b6af6d",
+                "actualSha256": "28bf9ab0ac20af3a9269f9a9c225c7f5e5d898bd6921f2cc5f9532c026b6af6d",
+                "status": "match"
+              },
+              "coverage": {
+                "complete": false,
+                "errors": [],
+                "frameWarnings": [
+                  {
+                    "frameId": "frame-1",
+                    "frameIndex": 0,
+                    "complete": false,
+                    "nodesVisited": 290,
+                    "engines": [
+                      {
+                        "engine": "uht",
+                        "root": "globalRuntime.sceneRoots",
+                        "publicHitTest": false,
+                        "reason": "private-scene-flags-only; recursive-runtime-queries-cannot-be-preempted",
+                        "canvasCount": 1,
+                        "camerasInspected": 19
+                      }
+                    ],
+                    "warnings": [
+                      "uht-result-cap",
+                      "uht-result-cap"
+                    ]
+                  },
+                  {
+                    "frameId": "frame-1",
+                    "frameIndex": 0,
+                    "complete": false,
+                    "nodesVisited": 290,
+                    "engines": [
+                      {
+                        "engine": "uht",
+                        "root": "globalRuntime.sceneRoots",
+                        "publicHitTest": false,
+                        "reason": "private-scene-flags-only; recursive-runtime-queries-cannot-be-preempted",
+                        "canvasCount": 1,
+                        "camerasInspected": 19
+                      }
+                    ],
+                    "warnings": [
+                      "uht-result-cap",
+                      "uht-result-cap"
+                    ]
+                  }
+                ]
+              },
+              "ocr": {
+                "status": "ok",
+                "elapsedMs": 6066,
+                "passes": [
+                  {
+                    "name": "original-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 44,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 1188
+                  },
+                  {
+                    "name": "original-psm6",
+                    "psm": 6,
+                    "status": "ok",
+                    "lines": 22,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 1425
+                  },
+                  {
+                    "name": "rb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 7,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 1157
+                  },
+                  {
+                    "name": "gb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 21,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 1148
+                  }
+                ],
+                "introText": []
+              }
+            }
+          ],
+          "targetVerifications": []
+        }
+      },
+      {
+        "id": "playngo-amulet-of-dead-mobile",
+        "executionStatus": "fulfilled",
+        "reportedSummary": {
+          "provider": "playngo",
+          "status": "intro_pending",
+          "available": 0,
+          "stableEnabledCandidates": 0,
+          "controls": 2,
+          "transient": 0,
+          "actions": 0
+        },
+        "report": {
+          "presence": "present",
+          "startedAt": "2026-10-23T21:15:01.695Z",
+          "finishedAt": "2026-10-23T21:16:12.424Z",
+          "settings": {
+            "initialWaitMs": 60000,
+            "settleMs": 1500,
+            "sampleGapMs": 300
+          },
+          "httpStatus": 200,
+          "initialWaitElapsedMs": 59999,
+          "errors": [],
+          "observationCount": 1,
+          "actionRecords": 0,
+          "dispatchedInputs": 0,
+          "actions": [],
+          "decisions": [
+            {
+              "at": "2026-10-23T21:16:12.419Z",
+              "input": {
+                "text": "CONTINUE",
+                "candidates": [
+                  {
+                    "id": "c0",
+                    "text": "CONTINUE",
+                    "kind": "ocr"
+                  }
+                ]
+              },
+              "decision": {
+                "status": "needs_review",
+                "action": "none",
+                "candidateId": null,
+                "confidence": 0.7636,
+                "inference": true,
+                "reason": "low_confidence",
+                "elapsedMs": 1790.31,
+                "rawIntent": {
+                  "type": "choice",
+                  "choice": "continue",
+                  "probabilities": {
+                    "continue": 0.7636,
+                    "dismiss": 0.0424,
+                    "none": 0.194
+                  },
+                  "confidence": 0.401,
+                  "answer_confidence": 0.7636,
+                  "action": {
+                    "act_probability": 1
+                  }
+                },
+                "rawTarget": {
+                  "type": "choice",
+                  "choice": "control_0",
+                  "probabilities": {
+                    "control_0": 0.7904,
+                    "no_control": 0.2096
+                  },
+                  "confidence": 0.2593,
+                  "answer_confidence": 0.7904,
+                  "action": {
+                    "act_probability": 1
+                  }
+                },
+                "usage": {
+                  "input_tokens": 205,
+                  "output_tokens": 0,
+                  "state_tokens": 35,
+                  "state_tokens_dropped": 0,
+                  "truncated": false,
+                  "truncated_questions": []
+                },
+                "stateTokens": 35,
+                "guard": null
+              }
+            }
+          ],
+          "persistenceGapMs": {
+            "count": 2,
+            "min": 294,
+            "max": 294,
+            "outside200to400": 0
+          },
+          "finalCounts": {
+            "controlRecords": 2,
+            "stableRecords": 2,
+            "availableRecords": 0,
+            "availabilityCounts": {
+              "unavailable": 2
+            },
+            "sourceCounts": {
+              "dom": 2
+            },
+            "stableVisibleEnabledRecords": 0,
+            "stableVisibleEnabledWithBoundsRecords": 0,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "timingAndStopEvents": [
+            {
+              "type": "initial-wait-complete",
+              "at": "2026-10-23T21:16:01.697Z",
+              "elapsedMs": 59999
+            }
+          ],
+          "observations": [
+            {
+              "index": 0,
+              "reason": "initial",
+              "elapsedMs": 8893,
+              "counts": {
+                "controlRecords": 2,
+                "stableRecords": 2,
+                "availableRecords": 0,
+                "availabilityCounts": {
+                  "unavailable": 2
+                },
+                "sourceCounts": {
+                  "dom": 2
+                },
+                "stableVisibleEnabledRecords": 0,
+                "stableVisibleEnabledWithBoundsRecords": 0,
+                "uht": {
+                  "records": 0,
+                  "distinctRoutes": 0,
+                  "stableVisibleEnabledRecords": 0,
+                  "stableVisibleEnabledDistinctRoutes": 0,
+                  "stableVisibleEnabledRoutes": [],
+                  "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+                }
+              },
+              "transientRecords": 0,
+              "persistenceGapMs": {
+                "count": 2,
+                "min": 294,
+                "max": 294,
+                "outside200to400": 0
+              },
+              "screenshot": {
+                "file": "000-initial.png",
+                "recordedSha256": "2abd282b1ed7764dc950eae219af985725272dcbc5a32d5fc09174e99104f677",
+                "actualSha256": "2abd282b1ed7764dc950eae219af985725272dcbc5a32d5fc09174e99104f677",
+                "status": "match"
+              },
+              "coverage": {
+                "complete": true,
+                "errors": [],
+                "frameWarnings": []
+              },
+              "ocr": {
+                "status": "ok",
+                "elapsedMs": 2598,
+                "passes": [
+                  {
+                    "name": "original-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 8,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 403
+                  },
+                  {
+                    "name": "original-psm6",
+                    "psm": 6,
+                    "status": "ok",
+                    "lines": 6,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 448
+                  },
+                  {
+                    "name": "rb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 10,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 800
+                  },
+                  {
+                    "name": "gb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 10,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 531
+                  }
+                ],
+                "introText": [
+                  {
+                    "text": "CONTINUE",
+                    "confidence": 96.544571,
+                    "readings": [
+                      "original-psm11",
+                      "original-psm6",
+                      "gb-psm11"
+                    ]
+                  },
+                  {
+                    "text": "CONTINUE |",
+                    "confidence": 71.9794235,
+                    "readings": [
+                      "rb-psm11"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "targetVerifications": []
+        }
+      },
+      {
+        "id": "bgaming-three-lucky-monkeys",
+        "executionStatus": "fulfilled",
+        "reportedSummary": {
+          "status": "failed",
+          "error": "OCR target changed before input"
+        },
+        "report": {
+          "presence": "present",
+          "startedAt": "2026-10-23T21:15:01.681Z",
+          "finishedAt": "2026-10-23T21:16:30.989Z",
+          "settings": {
+            "initialWaitMs": 60000,
+            "settleMs": 1500,
+            "sampleGapMs": 300
+          },
+          "httpStatus": 200,
+          "initialWaitElapsedMs": 60004,
+          "errors": [
+            {
+              "phase": "session",
+              "message": "OCR target changed before input"
+            }
+          ],
+          "observationCount": 2,
+          "actionRecords": 0,
+          "dispatchedInputs": 0,
+          "actions": [],
+          "decisions": [
+            {
+              "at": "2026-10-23T21:16:14.195Z",
+              "input": {
+                "text": "CLICK ANYWHERE TO START",
+                "candidates": [
+                  {
+                    "id": "c0",
+                    "text": "CLICK ANYWHERE TO START",
+                    "kind": "ocr"
+                  }
+                ]
+              },
+              "decision": {
+                "status": "ok",
+                "action": "continue",
+                "candidateId": "c0",
+                "confidence": 0.8224,
+                "inference": true,
+                "reason": "intro_action",
+                "elapsedMs": 1489.98,
+                "rawIntent": {
+                  "type": "choice",
+                  "choice": "continue",
+                  "probabilities": {
+                    "continue": 0.8643,
+                    "dismiss": 0.0252,
+                    "none": 0.1105
+                  },
+                  "confidence": 0.5793,
+                  "answer_confidence": 0.8643,
+                  "action": {
+                    "act_probability": 1
+                  }
+                },
+                "rawTarget": {
+                  "type": "choice",
+                  "choice": "control_0",
+                  "probabilities": {
+                    "control_0": 0.8224,
+                    "no_control": 0.1776
+                  },
+                  "confidence": 0.3251,
+                  "answer_confidence": 0.8224,
+                  "action": {
+                    "act_probability": 1
+                  }
+                },
+                "usage": {
+                  "input_tokens": 225,
+                  "output_tokens": 0,
+                  "state_tokens": 43,
+                  "state_tokens_dropped": 0,
+                  "truncated": false,
+                  "truncated_questions": []
+                },
+                "stateTokens": 43,
+                "guard": null
+              }
+            }
+          ],
+          "persistenceGapMs": {
+            "count": 0,
+            "min": null,
+            "max": null,
+            "outside200to400": 0
+          },
+          "finalCounts": {
+            "controlRecords": 0,
+            "stableRecords": 0,
+            "availableRecords": 0,
+            "availabilityCounts": {},
+            "sourceCounts": {},
+            "stableVisibleEnabledRecords": 0,
+            "stableVisibleEnabledWithBoundsRecords": 0,
+            "uht": {
+              "records": 0,
+              "distinctRoutes": 0,
+              "stableVisibleEnabledRecords": 0,
+              "stableVisibleEnabledDistinctRoutes": 0,
+              "stableVisibleEnabledRoutes": [],
+              "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+            }
+          },
+          "timingAndStopEvents": [
+            {
+              "type": "initial-wait-complete",
+              "at": "2026-10-23T21:16:01.687Z",
+              "elapsedMs": 60004
+            }
+          ],
+          "observations": [
+            {
+              "index": 0,
+              "reason": "initial",
+              "elapsedMs": 11007,
+              "counts": {
+                "controlRecords": 0,
+                "stableRecords": 0,
+                "availableRecords": 0,
+                "availabilityCounts": {},
+                "sourceCounts": {},
+                "stableVisibleEnabledRecords": 0,
+                "stableVisibleEnabledWithBoundsRecords": 0,
+                "uht": {
+                  "records": 0,
+                  "distinctRoutes": 0,
+                  "stableVisibleEnabledRecords": 0,
+                  "stableVisibleEnabledDistinctRoutes": 0,
+                  "stableVisibleEnabledRoutes": [],
+                  "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+                }
+              },
+              "transientRecords": 0,
+              "persistenceGapMs": {
+                "count": 0,
+                "min": null,
+                "max": null,
+                "outside200to400": 0
+              },
+              "screenshot": {
+                "file": "000-initial.png",
+                "recordedSha256": "037e73b01f58199a432e2f51c15a24ba6867975e9eea824db3cfe8bf6546cf91",
+                "actualSha256": "037e73b01f58199a432e2f51c15a24ba6867975e9eea824db3cfe8bf6546cf91",
+                "status": "match"
+              },
+              "coverage": {
+                "complete": true,
+                "errors": [],
+                "frameWarnings": []
+              },
+              "ocr": {
+                "status": "ok",
+                "elapsedMs": 4690,
+                "passes": [
+                  {
+                    "name": "original-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 14,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 849
+                  },
+                  {
+                    "name": "original-psm6",
+                    "psm": 6,
+                    "status": "ok",
+                    "lines": 10,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 902
+                  },
+                  {
+                    "name": "rb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 14,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 1035
+                  },
+                  {
+                    "name": "gb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 22,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 1037
+                  }
+                ],
+                "introText": [
+                  {
+                    "text": "CLICK ANYWHERE TO START",
+                    "confidence": 95.06468224999999,
+                    "readings": [
+                      "original-psm11",
+                      "original-psm6",
+                      "gb-psm11"
+                    ]
+                  }
+                ]
+              }
+            },
+            {
+              "index": 1,
+              "reason": "intro-revalidate",
+              "elapsedMs": 7445,
+              "counts": {
+                "controlRecords": 0,
+                "stableRecords": 0,
+                "availableRecords": 0,
+                "availabilityCounts": {},
+                "sourceCounts": {},
+                "stableVisibleEnabledRecords": 0,
+                "stableVisibleEnabledWithBoundsRecords": 0,
+                "uht": {
+                  "records": 0,
+                  "distinctRoutes": 0,
+                  "stableVisibleEnabledRecords": 0,
+                  "stableVisibleEnabledDistinctRoutes": 0,
+                  "stableVisibleEnabledRoutes": [],
+                  "note": "Routes deduplicate localId root/type/index prefixes; they are not proven unique input targets."
+                }
+              },
+              "transientRecords": 0,
+              "persistenceGapMs": {
+                "count": 0,
+                "min": null,
+                "max": null,
+                "outside200to400": 0
+              },
+              "screenshot": {
+                "file": "001-intro-revalidate.png",
+                "recordedSha256": "9aad589706d9d41327fc382454b2739af5910aa3a0f8a19484bcc187af32d1f2",
+                "actualSha256": "9aad589706d9d41327fc382454b2739af5910aa3a0f8a19484bcc187af32d1f2",
+                "status": "match"
+              },
+              "coverage": {
+                "complete": true,
+                "errors": [],
+                "frameWarnings": []
+              },
+              "ocr": {
+                "status": "ok",
+                "elapsedMs": 2841,
+                "passes": [
+                  {
+                    "name": "original-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 11,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 414
+                  },
+                  {
+                    "name": "original-psm6",
+                    "psm": 6,
+                    "status": "ok",
+                    "lines": 10,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 520
+                  },
+                  {
+                    "name": "rb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 9,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 526
+                  },
+                  {
+                    "name": "gb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 17,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 791
+                  }
+                ],
+                "introText": [
+                  {
+                    "text": "CLICK ANYWHERE TO START",
+                    "confidence": 95.75913800000001,
+                    "readings": [
+                      "original-psm11",
+                      "original-psm6",
+                      "gb-psm11"
+                    ]
+                  }
+                ]
+              }
+            }
+          ],
+          "targetVerifications": [
+            {
+              "at": "2026-10-23T21:16:30.989Z",
+              "candidateId": "ocr:click anywhere to start",
+              "expectedText": "CLICK ANYWHERE TO START",
+              "unchangedPixels": false,
+              "textMatched": true,
+              "before": "action-crop-0.png",
+              "after": "action-crop-0-after.png",
+              "beforeSha256": "86f010dd554bcf5229e4be1eedac90c8d37055965eae638264832e5a1d09a8c1",
+              "afterSha256": "6fd6bcefda3c08820ffb59832fed0a2c679afe8c574a6b173ea85f4212bede8f",
+              "ocr": {
+                "status": "ok",
+                "elapsedMs": 914,
+                "lines": [
+                  {
+                    "text": "CLICK ANYWHERE TO START",
+                    "confidence": 95.74227149999999,
+                    "bounds": {
+                      "x": 8,
+                      "y": 8,
+                      "width": 332,
+                      "height": 19
+                    },
+                    "readings": [
+                      "original-psm11",
+                      "original-psm6",
+                      "gb-psm11"
+                    ]
+                  }
+                ],
+                "passes": [
+                  {
+                    "name": "original-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 1,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 227
+                  },
+                  {
+                    "name": "original-psm6",
+                    "psm": 6,
+                    "status": "ok",
+                    "lines": 1,
+                    "scaleX": 1,
+                    "scaleY": 1,
+                    "elapsedMs": 193
+                  },
+                  {
+                    "name": "rb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 0,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 179
+                  },
+                  {
+                    "name": "gb-psm11",
+                    "psm": 11,
+                    "status": "ok",
+                    "lines": 1,
+                    "scaleX": 3,
+                    "scaleY": 3,
+                    "elapsedMs": 210
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "analysis": {
+    "bgamingCropComparison": {
+      "mode": "RGB",
+      "width": 348,
+      "height": 35,
+      "changedPixels": 3186,
+      "totalPixels": 12180,
+      "differenceBounds": [
+        7,
+        8,
+        340,
+        28
+      ],
+      "meanAbsoluteDifferencePerChannel": [
+        1.3289819376026273,
+        1.3922824302134647,
+        0.009852216748768473
+      ],
+      "maximumDifferencePerChannel": [
+        7,
+        8,
+        1
+      ]
+    }
+  }
+}
