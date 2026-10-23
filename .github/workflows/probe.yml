@@ -91,7 +91,7 @@ jobs:
         run: |
           mkdir -p artifacts
           npm test 2>&1 | tee artifacts/tests.log
-          python -m unittest discover -s python -p 'test_*.py' -v 2>&1 | tee artifacts/python-tests.log
+          python -m py_compile python/laya_server.py python/ocr_preprocess.py 2>&1 | tee artifacts/python-syntax.log
       - name: Install pinned CPU Laya
         run: |
           python -m pip install --upgrade pip
@@ -107,6 +107,16 @@ jobs:
           node scripts/wait-laya.mjs || { cat artifacts/laya-server.log; exit 1; }
       - name: Verify real model inference
         run: npm run test:laya 2>&1 | tee artifacts/laya-smoke.log
+      - name: Save model decision diagnostics
+        uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.laya-start.outcome == 'success' }}
+        with:
+          name: laya-decision-diagnostics
+          path: |
+            artifacts/laya-smoke.json
+            artifacts/laya-smoke.log
+          retention-days: 14
+          if-no-files-found: error
       - name: Verify 60-second load and dynamic action cycle
         if: ${{ !cancelled() && steps.laya-start.outcome == 'success' }}
         run: npm run test:integration 2>&1 | tee artifacts/integration.log

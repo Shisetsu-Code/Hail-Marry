@@ -70,9 +70,9 @@ export class GameSession {
       clip.width = Math.min(viewport.width - clip.x, b.width + 16);
       clip.height = Math.min(viewport.height - clip.y, b.height + 16);
       const cropPath = path.join(this.outputDir, 'action-crop-' + this.report.actions.length + '.png');
-      const first = await this.page.screenshot({ path: cropPath, clip, scale: 'css', timeout: 3000 });
+      const first = await this.page.screenshot({ path: cropPath, clip, scale: 'css', timeout: 15000 });
       const text = await readScreenshotText(cropPath, { signal: this.signal, timeoutMs: 3000 });
-      const now = await this.page.screenshot({ clip, scale: 'css', timeout: 3000 });
+      const now = await this.page.screenshot({ clip, scale: 'css', timeout: 15000 });
       const normalized = value => value.toLowerCase().replace(/\W+/g, ' ').trim();
       if (!first.equals(now) || text.status !== 'ok' || !text.lines.some(line => normalized(line.text) === normalized(candidate.text))) {
         throw new Error('OCR target changed before input');

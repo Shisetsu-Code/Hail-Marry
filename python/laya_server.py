@@ -69,7 +69,10 @@ def questions_for(payload: dict[str, Any]) -> dict[str, Any]:
         f"control_{index}": candidate["text"] or "Unlabelled control; purpose is unknown."
         for index, candidate in enumerate(payload["candidates"])
     }
-    target_options["no_control"] = "None of these controls clearly continues or dismisses the introduction."
+    target_options["no_control"] = (
+        "No matching opening-screen control. The labels are gameplay, "
+        "purchase, unrelated or unclear controls."
+    )
     return {
         "intent": {
             "type": "choice",
@@ -82,7 +85,11 @@ def questions_for(payload: dict[str, Any]) -> dict[str, Any]:
         },
         "target": {
             "type": "choice",
-            "instructions": "Which visible control continues past or dismisses the introduction without spinning or betting?",
+            "instructions": (
+                "Which displayed control matches the explicit instruction "
+                "to advance or dismiss the opening screen? "
+                "Select no_control if no label matches."
+            ),
             "criteria": target_options,
         },
     }

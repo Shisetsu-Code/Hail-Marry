@@ -39,6 +39,8 @@ Instala Node 22, Python 3.11, Chromium, Tesseract y Laya CPU con checkpoint fija
 
 El artefacto **hail-marry-evidence** contiene logs, PNG, resultados JSON y versiones Python. Se contabilizan por separado los candidatos estables visibles/habilitados y los controles con recepción de input confirmada. Si ninguna DEMO demuestra controles disponibles, la sonda termina con código 2 y conserva evidencia.
 
+Las comprobaciones de instalación, modelo y fixture se evalúan por separado de la cobertura de las demos. La sonda requiere al menos una sesión sin errores registrados, sin una introducción reconocida pendiente y con algún control disponible. Un código 0 sólo acredita esa observación en una sesión; por sí solo no acredita controles de gameplay ni soporte completo de los tres juegos. Los candidatos de motor con estado y coordenadas estables conservan disponibilidad desconocida cuando falta evidencia de recepción de input.
+
 ## Reproducir en Linux
 
     npm ci

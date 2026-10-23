@@ -4,7 +4,7 @@ Laya receives text that the scanner has already read from DOM controls or Tesser
 
 ## Pinned installation
 
-The initial target is GitHub Actions on Linux x64 with Python 3.12. Install the CPU wheel explicitly, then the requirements:
+The initial target is GitHub Actions on Linux x64 with Python 3.11. Install the CPU wheel explicitly, then the requirements:
 
 ```bash
 python -m pip install torch==2.8.0+cpu --index-url https://download.pytorch.org/whl/cpu
@@ -46,10 +46,10 @@ The default 12-second inference deadline terminates a stuck model worker and mak
 Run the actual model smoke test in the GitHub job:
 
 ```bash
-python python/laya_server.py --self-test > laya-smoke.json
+npm run test:laya
 ```
 
-This command runs the same pinned runtime and exits nonzero unless a `Click to continue` fixture produces an actionable `continue` decision and a gameplay `Spin` fixture produces no action. The JSON contains the raw typed answers, confidence, timing and runtime metadata even when a semantic fixture fails. A successful import or mocked client test is not evidence that the model passed these fixtures. The scanner's browser fixtures provide the separate check of OCR, targeting and post-action stability.
+This command calls the running local service and saves fourteen input/response pairs to `artifacts/laya-smoke.json` before checking its semantic assertions. Required cases include the exact scanner payload `CLICK TO CONTINUE`, `TAP TO CONTINUE`, contextual introduction text, mixed controls in two orders, gameplay text, and `SPIN` / `BUY BONUS` / `BUY BONUS TO CONTINUE` negatives. Additional diagnostic cases compare casing, context and the actual short or bordered prompts read from public demos. Diagnostic abstentions remain visible and do not become actionable clicks. The JSON contains raw typed answers, confidence, timing and runtime metadata even when an assertion fails. A successful import or mocked client test is not evidence that the model passed these fixtures. The scanner's browser fixture separately checks OCR, targeting and post-action stability.
 
 Fast boundary checks do not load a model:
 
