@@ -45,7 +45,7 @@ Interfaces: REST API and runner contract in spec.
 - [x] Run baseline/new test suites and real UI fixture flow; independently review complete changes.
 - [x] Publish to Hail-Marry, start workflow and verify saved demo captures: two usable screens and one mobile screen pending.
 - [x] Verify authenticated UI against the real local server/browser and check public tunnel health from the GitHub runner.
-- [ ] Deliver the replacement session URL and its expiration; report that this development environment's HTTP 403 prevents an authenticated external tunnel check.
+- [x] Prepare the replacement session URL for handoff, verify its recorded expiration and report that this development environment's HTTP 403 prevents an authenticated external tunnel check. See docs/guided-classifier-validation-2026-10-23.md for evidence and limits.
 
 ## Decisions
 
